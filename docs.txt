@@ -1,0 +1,29 @@
+# standart requirements.txt
+fastapi
+uvicorn
+scrapy
+psycopg2-binary==2.9.10
+asyncpg
+alembic
+---------------------------------------------------------
+
+# Start scrapy app with command:
+scrapy startproject my_scraper
+---------------------------------------------------------
+
+# Copy everything from directory to some path:
+cp -r . /home/user/path/to/destination_folder
+# From directory to directory:
+cp -r /home/user/path/to/source_folder /home/user/path/to/destination_folder
+---------------------------------------------------------
+
+# If in Windows VS Code can't activate venv:
+# Open Powershell and run:
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+---------------------------------------------------------
+
+# If permission deniad in vs code to edit file
+sudo chmod -R 777 /path/to/your/file(or directory) - for everyone
+# 777: Grants read (4), write (2), and execute (1) permissions to everyone (owner, group, and others).
+sudo chown -R $USER /path/to/your/file(or directory) - for logged user
+-----------------------------------------------------------

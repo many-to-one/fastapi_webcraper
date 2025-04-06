@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: scrap_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT}:${DB_PORT}"
+    environment:
+      POSTGRES_NAME: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      PGPORT: ${DB_PORT}
+      PGHOST: ${DB_HOST}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      retries: 5
+      start_period: 1s
+      timeout: 10s
+
+  web:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: scrap_web
+    command: uvicorn main:app --host 0.0.0.0 --port ${DJANGO_PORT} --reload
+    volumes:
+      - .:/app
+    ports:
+      - "${DJANGO_PORT}:${DJANGO_PORT}"
+    depends_on:
+      - db
+    env_file:
+    - .env
+
+
+volumes:
+  postgres_data:
