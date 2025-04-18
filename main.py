@@ -23,12 +23,12 @@ async def root(request: Request, response=HTMLResponse):
     )
 
 @app.post("/scrape") 
-async def run_spider(background_tasks: BackgroundTasks, url: str = Form(...)): 
+async def run_spider(background_tasks: BackgroundTasks, title: str = Form(...), category: str = Form(...)): 
 
-    # url="https://www.amazon.com/s?k=iphone+16+pro+case&crid=2HY21R9MW4WN7&sprefix=Iphone%2Caps%2C375&ref=nb_sb_ss_ts-doa-p_2_6"
+    decoded_url = f"https://www.amazon.pl/s?k={title}&i={category}"
 
     # Decode URL from FastAPI path
-    decoded_url = unquote(url)
+    # decoded_url = unquote(url)
 
 
     print(f"Decoded URL: {decoded_url}")
@@ -49,14 +49,14 @@ async def run_spider(background_tasks: BackgroundTasks, url: str = Form(...)):
 @app.get('/vis')
 async def visualization():
 
-    df = pd.read_excel("templates/products.xlsx")
+    df = pd.read_excel("amz/scraped_offers.xlsx")
     df["price"] = pd.to_numeric(df["price"], errors="coerce")
 
-    # fig = px.bar(df.nlargest(10, "price"), y="title", x="price", color="rating", title="Top 10 Most Expensive Products")
-    fig = px.bar(df.nlargest(10, "price"), 
-             y="title", x="price", color="rating",
-             title="Top 10 Most Expensive Products",
-             category_orders={"title": df.nlargest(10, "price")["title"].tolist()[::-1]})
+    fig = px.bar(df.nlargest(20, "price"), y="title", x="price", color="price", title="Top 10 Most Expensive Products")
+    # fig = px.bar(df.nlargest(10, "price"), 
+    #          y="title", x="price", color="rating",
+    #          title="Top 10 Most Expensive Products",
+    #          category_orders={"title": df.nlargest(10, "price")["title"].tolist()[::-1]})
 
 
 
