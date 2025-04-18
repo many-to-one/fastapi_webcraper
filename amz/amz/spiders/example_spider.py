@@ -1,25 +1,39 @@
 import scrapy
+import pandas as pd
 
 class ExampleSpider(scrapy.Spider):
-    name = "example"
+    name = "amazon"
     allowed_domains = ["amazon.pl"]
-    # start_urls = ["https://www.amazon.com/s?k=laptops"] # Wyszukiwarka
+    # start_urls = ["https://www.amazon.com/s?k=laptops&page=22"] # Wyszukiwarka
     # start_urls = ["https://www.amazon.com/s?k=zabawki&page=8"] # i td
-    start_urls = ["https://www.amazon.pl/s?i=electronics&bbn=20657432031&rh=n%3A20788267031&s=popularity-rank&fs=true&page=2&ref=lp_20788267031_sar"]
+    start_urls = ["https://www.amazon.com/s?k=tablets&rh=n%3A1232597011%2Cp_n_size_browse-bin%3A7817235011&crid=1Y6QHLGWI6DP1&nav_sdd=aps&rnid=1254615011&sprefix=tablets&ref=nb_sb_ss_w_sbl-tr-t1_k0_1_7_0"]
 
     def parse(self, response):
 
         if response.status == 403:
             self.log("Access forbidden - 403 error.")
             return
-        
-
+        products = []
         for product in response.css('div.s-main-slot div.s-result-item'):
-            yield {
-                'title': product.css('span::text').get(),
-                'image_url': product.css('img.s-image::attr(src)').get(),  # Extract image URL
-                'price': product.css('span.a-price-whole::text').get(),
-                'rating': product.css('span.a-icon-alt::text').get(),
-                'reviews': product.css('span.a-size-base.s-underline-text::text').get(),
-                'url': product.css('a.a-link-normal::attr(href)').get(),
-            }
+            products.append(
+                {
+                    'title': product.css('span::text').get(),
+                    'image_url': product.css('img.s-image::attr(src)').get(),  # Extract image URL
+                    'price': product.css('span.a-price-whole::text').get(),
+                    'rating': product.css('span.a-icon-alt::text').get(),
+                    'reviews': product.css('span.a-size-base.s-underline-text::text').get(),
+                    'url': product.css('a.a-link-normal::attr(href)').get(),
+                }
+            )
+
+            df = pd.DataFrame(products)
+            df.to_excel("products.xlsx", index=False, engine="openpyxl")
+
+            # yield {
+            #     'title': product.css('span::text').get(),
+            #     'image_url': product.css('img.s-image::attr(src)').get(),  # Extract image URL
+            #     'price': product.css('span.a-price-whole::text').get(),
+            #     'rating': product.css('span.a-icon-alt::text').get(),
+            #     'reviews': product.css('span.a-size-base.s-underline-text::text').get(),
+            #     'url': product.css('a.a-link-normal::attr(href)').get(),
+            # }
