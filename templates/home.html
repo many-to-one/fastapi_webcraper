@@ -3,18 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <title>e-analitics</title>
 </head>
 <body>
     <h1>Home</h1>
-    <form action="/scrape" method="post">
-        <input type="text" name="title" placeholder="Produkt">
-        <input type="text" name="category" placeholder="Kategoria">
-        <button type="submit">Go</button>
+    <form action="/scrape" method="post" class="search-form">
+         <div id="categoryId">
+            <div value="Test 1">
+                <p onclick="showCat()">Dziecko, zabawki i gry</p>
+                <div id="accordion-content">
+                    <p onclick="setSubCat('toys&rh=n%3A20659660031%2Cn%3A20861477031')">Figurki do zabaw</p>
+                    <p onclick="setSubCat('toys&rh=n%3A20659660031%2Cn%3A20861473031')">Gry i akcesoria do gier</p>
+                    <p onclick="setSubCat('toys&rh=n%3A20659660031%2Cn%3A20861471031')">Lalki i akcesoria</p>
+                    <p onclick="setSubCat('toys&rh=n%3A20659660031%2Cn%3A20861480031')">Maskotki i pluszaki</p>
+                    <p onclick="setSubCat('toys&rh=n%3A20659660031%2Cn%3A20861468031')">Pacynki i teatrzyki kukiełkowe</p>
+                    <p onclick="setSubCat('toys&rh=n%3A20659660031%2Cn%3A20861472031')">Plastyka</p>
+                    <p onclick="setSubCat('toys&rh=n%3A20659660031%2Cn%3A20861464031')">Pojazdy zabawkowe</p>
+                    <p onclick="setSubCat('toys&rh=n%3A20659660031%2Cn%3A20861467031')">Produkty do zabawy w przebieranki i udawanie</p>
+                    <p onclick="setSubCat('toys&rh=n%3A20659660031%2Cn%3A20861465031')">Puzzle, łamigłówki i akcesoria</p>
+                    <p onclick="setSubCat('toys&rh=n%3A20659660031%2Cn%3A20861476031')">Sport i turystyka</p>
+                    <p onclick="setSubCat('toys&rh=n%3A20659660031%2Cn%3A20861469031')">Śmieszne i nowatorskie zabawki</p>
+                    <p onclick="setSubCat('toys&rh=n%3A20659660031%2Cn%3A20861475031')">Zabawki dla małych dzieci i niemowląt</p>
+                    <p onclick="setSubCat('')"></p>
+                    <p onclick="setSubCat('toys&rh=n%3A20659660031%2Cn%3A20861479031')">Gry planszowe</p>
+                    <p onclick="setSubCat()">Test 1 content</p>
+                    <p onclick="setSubCat()">Test 1 content</p>
+                </div>
+            </div>
+            <div value="Test 2">Test 2</div>
+            <div value="Test 3">Test 3</div>
+        </div>
+        <input type="hidden" name="category" id="selectedCat" placeholder="Kategoria">
+        <input type="text" name="title" id="title" placeholder="Produkt">
+        <button type="submit" id="search-btn">Go</button>
     </form>
 
-    <!-- <script>
-        document.addEventListener()
-    </script> -->
+    <script>
+        
+        function showCat() {
+            const subContent = document.getElementById("accordion-content");
+
+            if (subContent.style.display === "none" || subContent.style.display === "") {
+                subContent.style.display = "block";
+            } else {
+                subContent.style.display = "none";
+            }
+        }
+
+        function setSubCat(category) {
+            console.log('selected category:', category)
+            document.getElementById("selectedCat").value = category;
+        }
+    </script>
 </body>
 </html>

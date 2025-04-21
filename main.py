@@ -25,7 +25,10 @@ async def root(request: Request, response=HTMLResponse):
 @app.post("/scrape") 
 async def run_spider(background_tasks: BackgroundTasks, title: str = Form(...), category: str = Form(...)): 
 
-    decoded_url = f"https://www.amazon.pl/s?k={title}&i={category}"
+    if title == "all":
+        decoded_url = f"https://www.amazon.pl/s?i={category}"
+    else:
+        decoded_url = f"https://www.amazon.pl/s?k={title}&i={category}"
 
     # Decode URL from FastAPI path
     # decoded_url = unquote(url)
@@ -51,14 +54,16 @@ async def visualization():
 
     df = pd.read_excel("amz/scraped_offers.xlsx")
     df["price"] = pd.to_numeric(df["price"], errors="coerce")
+    df["short_title"] = df["title"].apply(lambda x: x[:20] + "..." if len(x) > 20 else x)
 
-    fig = px.bar(df.nlargest(20, "price"), y="title", x="price", color="price", title="Top 10 Most Expensive Products")
-    # fig = px.bar(df.nlargest(10, "price"), 
-    #          y="title", x="price", color="rating",
-    #          title="Top 10 Most Expensive Products",
-    #          category_orders={"title": df.nlargest(10, "price")["title"].tolist()[::-1]})
-
-
+    fig = px.bar(
+        df, #.nlargest("price"),
+        y="short_title", 
+        x="price", 
+        color="price", 
+        hover_data={"short_title": False, "title": True},
+        # title="Top 10 Most Expensive Products"
+    )
 
     content = fig.to_html(full_html=True)
 

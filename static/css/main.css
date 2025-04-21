@@ -1,0 +1,25 @@
+.search-form {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 10px;
+}
+
+#accordion-content {
+    display: none;
+    margin-left: 20px;
+}
+
+#categoryId {
+    width: 400px;
+}
+
+#title {
+    height: 30px;
+    width: 400px;
+}
+
+#search-btn {
+    height: 35px;
+
+}
