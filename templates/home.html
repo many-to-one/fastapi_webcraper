@@ -11,10 +11,73 @@
     <h1>Home</h1>
     <form action="/scrape" method="post" class="search-form">
          <div id="categoryId">
+
             <div>
-                <p onclick="showCat()">Dziecko, zabawki i gry</p>
-                <div id="accordion-content">
-                    <p onclick="setSubCat('toys&rh=n%3A20659660031%2Cn%3A20861477031')">Figurki do zabaw</p>
+                <p onclick="showCat(1)">Elektronika, komputery i biuro</p>
+                <div id="accordion-content-1" class="accordion-content" style="display: none;">
+                    <h4>Elektronika</h4>
+                    <p onclick="setSubCat('electronics&rh=n%3A20788252031')">Telefony komórkowe i smartfony</p>
+                    <p onclick="setSubCat('electronics&rh=n%3A20788253031')">Słuchawki i akcesoria</p>
+                    <p onclick="setSubCat('electronics&rh=n%3A20788257031')">Aparaty i fotografia</p>
+                    <p onclick="setSubCat('electronics&rh=n%3A20788265031')">Kina domowe, telewizory i odtwarzacze</p>
+                    <p onclick="setSubCat('electronics&rh=n%3A20788264031')">Hi-Fi i domowy sprzęt audio</p>
+                    <h4>Komputery</h4>
+                    <p onclick="setSubCat('computers&rh=n%3A20788299031')">Komputery stacjonarne</p>
+                    <p onclick="setSubCat('computers&rh=n%3A20788292031', 'Laptopy')">Laptopy</p>
+                    <p onclick="setSubCat('computers&rh=n%3A20788300031')">Tablety</p>
+                    <p onclick="setSubCat('computers&rh=n%3A20788294031')">Monitory</p>
+                    <p onclick="setSubCat('computers&rh=n%3A20788301031')">Akcesoria komputerowe</p>
+                    <p onclick="setSubCat('computers&rh=n%3A20788298031')">Podzespoły i części komputerowe</p>
+                    <p onclick="setSubCat('computers&rh=n%3A20788303031')">Przechowywanie danych</p>
+                    <p onclick="setSubCat('software&rh=n%3A20659426031')">Oprogramowanie</p>
+                    <p onclick="setSubCat('computers&rh=n%3A20788293031')">Drukarki i akcesoria</p>
+                    <p onclick="setSubCat('computers&rh=n%3A20788297031')">Skanery i akcesoria</p>
+                    <h4>Biuro</h4>
+                    <p onclick="setSubCat('office-products&rh=n%3A20854635031')">Artykuły biurowe</p>
+                    <p onclick="setSubCat('office-products&rh=n%3A20854636031')">Długopisy, ołówki i materiały do pisania</p>
+                    <p onclick="setSubCat('office-products&rh=n%3A20854632031')">Materiały szkolne i edukacyjne</p>
+                    <p onclick="setSubCat('office-products&rh=n%3A20854631031')">Artykuły papiernicze</p>
+                    <p onclick="setSubCat('computers&rh=n%3A20788584031')">Tusze, atramenty, tonery i taśmy</p>
+                    <p onclick="setSubCat('office-products&rh=n%3A20854630031')">Elektronika biurowa</p>
+                    <p onclick="setSubCat('electronics&')"></p>
+                </div>
+            </div>
+
+            <div>
+                <p onclick="showCat(2)">Dom i Ogród</p>
+                <div id="accordion-content-2" class="accordion-content" style="display: none;">
+                    <h4>Dom i Kuchnia</h4>
+                    <p onclick="setSubCat('home&rh=n%3A20853159031', 'Garnki i patelnie')">Garnki i patelnie</p>
+                    <p onclick="setSubCat('home&rh=n%3A20853010031')">Zastawa stołowa</p>
+                    <p onclick="setSubCat('home&rh=n%3A20853014031')">Przybory i gadżety kuchenne</p>
+                    <p onclick="setSubCat('home&rh=n%3A20852960031')">Meble</p>
+                    <p onclick="setSubCat('home&rh=n%3A20852956031')">Sprzęt AGD</p>
+                    <p onclick="setSubCat('home&rh=n%3A20852961031')">Dekoracje i wystrój wnętrz</p>
+                    <p onclick="setSubCat('home&rh=n%3A20852957031')">Pościel</p>
+                    <p onclick="setSubCat('home&rh=n%3A20852964031')">Łazienka</p>
+                    <p onclick="setSubCat('home&rh=n%3A20852963031')">Pranie, przechowywanie i organizowanie</p>
+                    <p onclick="setSubCat('home&rh=n%3A20852962031')">Odkurzacze i sprzęt do sprzątnia</p>
+                    <h4>Renowacja domu</h4>
+                    <p onclick="setSubCat('home-improvement&rh=n%3A20784174031')">Oświetlenie</p>
+                    <p onclick="setSubCat('home-improvement&rh=n%3A20784170031')">Artykuły budowlane</p>
+                    <p onclick="setSubCat('home-improvement&rh=n%3A20784171031')">Narzędzia </p>
+                    <p onclick="setSubCat('home-improvement&rh=n%3A20784162031')">Bezpieczeństwo</p>
+                    <p onclick="setSubCat('home-improvement&rh=n%3A20784164031')">Wyposażenie kuchni i łazienki</p>
+                    <p onclick="setSubCat('home-improvement&rh=n%3A20784169031')">Materiały do malowania i tapetowania</p>
+                    <h4>Ogród</h4>
+                    <p onclick="setSubCat('garden&rh=n%3A20855078031')">Meble ogrodowe i akcesoria</p>
+                    <p onclick="setSubCat('garden&rh=n%3A20855086031')">Dekoracje ogrodowe</p>
+                    <p onclick="setSubCat('garden&rh=n%3A20855088031')">Grillowanie i piknikowanie</p>
+                    <p onclick="setSubCat('garden&rh=n%3A20855076031')">Narzędzia ogrodowe</p>
+                    <p onclick="setSubCat('')"></p>
+                </div>
+            </div>
+
+            <div>
+                <p onclick="showCat(3)">Dziecko, zabawki i gry</p>
+                <div id="accordion-content-3" class="accordion-content" style="display: none;">
+                    <h4>Zabawki i gry</h4>
+                    <p onclick="setSubCat('toys&rh=n%3A20659660031%2Cn%3A20861477031', 'Figurki do zabaw')">Figurki do zabaw</p>
                     <p onclick="setSubCat('toys&rh=n%3A20659660031%2Cn%3A20861473031')">Gry i akcesoria do gier</p>
                     <p onclick="setSubCat('toys&rh=n%3A20659660031%2Cn%3A20861471031')">Lalki i akcesoria</p>
                     <p onclick="setSubCat('toys&rh=n%3A20659660031%2Cn%3A20861480031')">Maskotki i pluszaki</p>
@@ -32,12 +95,24 @@
                     <p onclick="setSubCat('toys&rh=n%3A20659660031%2Cn%3A20861470031')">Zabawki konstrukcyjne i do budowania</p>
                     <p onclick="setSubCat('toys&rh=n%3A20659660031%2Cn%3A20861466031')">Zabawkowe instrumenty muzyczne</p>
                     <p onclick="setSubCat('toys&rh=n%3A20659660031%2Cn%3A20861484031')">Zdalnie sterowane zabawki</p>
-                    <p onclick="setSubCat('toys&')"></p>
+                    <h4>Dziecko</h4>
+                    <p onclick="setSubCat('fashion&rh=n%3A20849017031')">Odzież i obuwie</p>
+                    <p onclick="setSubCat('baby&rh=n%3A20806748031')">Foteliki samochodowe i akcesoria</p>
+                    <p onclick="setSubCat('baby&rh=n%3A20806764031')">Nianie elektroniczne</p>
+                    <p onclick="setSubCat('baby&rh=n%3A20806749031')">Nosidełka dla dzieci</p>
+                    <p onclick="setSubCat('baby&rh=n%3A20806743031')">Karmienie dziecka</p>
+                    <p onclick="setSubCat('baby&rh=n%3A20806747031')">Wózki, spacerówki i akcesoria</p>
+                    <p onclick="setSubCat('baby&rh=n%3A20806745031')">Pokój dziecięcy</p>
+                    <p onclick="setSubCat('baby&rh=n%3A20806740031')">Przewijanie niemowląt</p>
+                    <p onclick="setSubCat('')"></p>
+                    <p onclick="setSubCat('')"></p>
+                    <p onclick="setSubCat('')"></p>
+                    <p onclick="setSubCat('')"></p>
                 </div>
             </div>
-            <div value="Test 2">Test 2</div>
-            <div value="Test 3">Test 3</div>
+
         </div>
+        <input type="hidden" name="category_name" id="selectedCatName" placeholder="Nazwa Kategorii">
         <input type="hidden" name="category" id="selectedCat" placeholder="Kategoria">
         <input type="text" name="title" id="title" placeholder="Produkt">
         <button type="submit" id="search-btn">Go</button>
@@ -45,8 +120,8 @@
 
     <script>
         
-        function showCat() {
-            const subContent = document.getElementById("accordion-content");
+        function showCat(number) {
+            const subContent = document.getElementById(`accordion-content-${number}`);
 
             if (subContent.style.display === "none" || subContent.style.display === "") {
                 subContent.style.display = "block";
@@ -55,9 +130,10 @@
             }
         }
 
-        function setSubCat(category) {
+        function setSubCat(category, catName) {
             console.log('selected category:', category)
             document.getElementById("selectedCat").value = category;
+            document.getElementById("selectedCatName").value = catName;
         }
     </script>
 </body>

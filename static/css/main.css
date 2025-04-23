@@ -5,7 +5,7 @@
     gap: 10px;
 }
 
-#accordion-content {
+.accordion-content {
     display: none;
     margin-left: 20px;
 }

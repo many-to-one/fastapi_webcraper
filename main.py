@@ -23,9 +23,11 @@ async def root(request: Request, response=HTMLResponse):
     )
 
 @app.post("/scrape") 
-async def run_spider(background_tasks: BackgroundTasks, title: str = Form(...), category: str = Form(...)): 
+async def run_spider(background_tasks: BackgroundTasks, title: str = Form(...), category: str = Form(...), category_name: str = Form(...)): 
 
-    if title == "all":
+    print(' ******************************* title ******************************* ', title)
+
+    if title == "":
         decoded_url = f"https://www.amazon.pl/s?i={category}"
     else:
         decoded_url = f"https://www.amazon.pl/s?k={title}&i={category}"
@@ -43,7 +45,7 @@ async def run_spider(background_tasks: BackgroundTasks, title: str = Form(...), 
     # command = ["scrapy", "crawl", spider_name]
 
     # Pass the URL as an argument to the spider
-    command = ["scrapy", "crawl", spider_name, "-a", f"url={decoded_url}"]
+    command = ["scrapy", "crawl", spider_name, "-a", f"url={decoded_url}", "-a", f"category_name={category_name}"]
 
     background_tasks.add_task(subprocess.Popen, command, cwd=SCRAPY_PROJECT_PATH) 
     return {"message": f"Started spider {spider_name}"}
