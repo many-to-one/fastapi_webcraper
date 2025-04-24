@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <title>Visualization</title>
+</head>
+<body>
+    
+    <form class="search-form">
+
+        <div id="categoryId">
+
+            <div>
+                <p onclick="showCat(3)">Dziecko, zabawki i gry</p>
+                <div id="accordion-content-3" class="accordion-content" style="display: none;">
+                    <h4>Zabawki i gry</h4>
+                    <p onclick="setSubCat('Figurki do zabaw', 3)">Figurki do zabaw</p>
+                    <p onclick="setSubCat('Gry i akcesoria do gier', 3)">Gry i akcesoria do gier</p>
+                    <p onclick="setSubCat('Lalki i akcesoria', 3)">Lalki i akcesoria</p>
+                    <p onclick="setSubCat('Maskotki i pluszaki', 3)">Maskotki i pluszaki</p>
+                    <p onclick="setSubCat('Pacynki i teatrzyki kukiełkowe', 3)">Pacynki i teatrzyki kukiełkowe</p>
+                    <p onclick="setSubCat('Plastyka', 3)">Plastyka</p>
+                    <p onclick="setSubCat('Pojazdy zabawkowe')">Pojazdy zabawkowe</p>
+                    <p onclick="setSubCat('Produkty do zabawy w przebieranki i udawanie')">Produkty do zabawy w przebieranki i udawanie</p>
+                    <p onclick="setSubCat('Puzzle, łamigłówki i akcesoria')">Puzzle, łamigłówki i akcesoria</p>
+                    <p onclick="setSubCat('Sport i turystyka')">Sport i turystyka</p>
+                    <p onclick="setSubCat('Śmieszne i nowatorskie zabawki')">Śmieszne i nowatorskie zabawki</p>
+                    <p onclick="setSubCat('Zabawki dla małych dzieci i niemowląt')">Zabawki dla małych dzieci i niemowląt</p>
+                    <p onclick="setSubCat('Zabawki do nauki i edukacji')">Zabawki do nauki i edukacji</p>
+                    <p onclick="setSubCat('Zabawki elektroniczne')">Zabawki elektroniczne</p>
+                    <p onclick="setSubCat('Zabawki kolekcjonerskie')">Zabawki kolekcjonerskie</p>
+                    <p onclick="setSubCat('Zabawki konstrukcyjne i do budowania')">Zabawki konstrukcyjne i do budowania</p>
+                    <p onclick="setSubCat('Zabawkowe instrumenty muzyczne')">Zabawkowe instrumenty muzyczne</p>
+                    <p onclick="setSubCat('Zdalnie sterowane zabawki', 3)">Zdalnie sterowane zabawki</p>
+                    <h4>Dziecko</h4>
+                    <p onclick="setSubCat('Odzież i obuwie')">Odzież i obuwie</p>
+                    <p onclick="setSubCat('Foteliki samochodowe i akcesoria')">Foteliki samochodowe i akcesoria</p>
+                    <p onclick="setSubCat('Nianie elektroniczne')">Nianie elektroniczne</p>
+                    <p onclick="setSubCat('Nosidełka dla dzieci')">Nosidełka dla dzieci</p>
+                    <p onclick="setSubCat('Karmienie dziecka')">Karmienie dziecka</p>
+                    <p onclick="setSubCat('Wózki, spacerówki i akcesoria')">Wózki, spacerówki i akcesoria</p>
+                    <p onclick="setSubCat('Pokój dziecięcy')">Pokój dziecięcy</p>
+                    <p onclick="setSubCat('Przewijanie niemowląt')">Przewijanie niemowląt</p>
+                </div>
+            </div>
+
+            <input type="hidden" name="category" id="selectedCat" placeholder="Kategoria">
+            <input type="text" name="title" placeholder="Szukaj" id="title">
+            <button onclick="showVis()">Go</button>
+        </div>
+
+    </form>
+
+    <script>
+
+        function showVis() {
+
+            event.preventDefault();
+            var title = document.getElementById('title').value;
+            var category = document.getElementById("selectedCat").value;
+            console.log('title', title);
+            console.log('category:', category);
+
+            window.location.href = `/visualization/${category}.xlsx?search=${title}`;
+        }
+
+        function showCat(number) {
+            const subContent = document.getElementById(`accordion-content-${number}`);
+
+            if (subContent.style.display === "none" || subContent.style.display === "") {
+                subContent.style.display = "block";
+            } else {
+                subContent.style.display = "none";
+            }
+        }
+
+        function setSubCat(category, number) {
+            console.log('selected category:', category);
+            document.getElementById("selectedCat").value = category;
+
+            showCat(number);
+        }
+
+    </script>
+
+</body>
+</html>

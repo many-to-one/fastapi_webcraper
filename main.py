@@ -1,15 +1,17 @@
-from fastapi import FastAPI, BackgroundTasks, Request, Form
+from fastapi import FastAPI, BackgroundTasks, Request, Form, Query
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from urllib.parse import unquote, quote
-import subprocess
+import subprocess, os
 import pandas as pd
 import plotly.express as px
 
 
 app = FastAPI()
+
+DATA_DIR = "amz"
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -21,6 +23,14 @@ async def root(request: Request, response=HTMLResponse):
     return templates.TemplateResponse(
         request=request, name="home.html", context={"id": id}
     )
+
+
+@app.get("/bar")
+async def root(request: Request, response=HTMLResponse):
+    return templates.TemplateResponse(
+        request=request, name="bar.html"
+    )
+
 
 @app.post("/scrape") 
 async def run_spider(background_tasks: BackgroundTasks, title: str = Form(...), category: str = Form(...), category_name: str = Form(...)): 
@@ -51,22 +61,70 @@ async def run_spider(background_tasks: BackgroundTasks, title: str = Form(...), 
     return {"message": f"Started spider {spider_name}"}
 
 
-@app.get('/vis')
-async def visualization():
+@app.get('/visualization/{filename}')
+async def visualization(request: Request, filename: str, search: str = Query(None)):
 
-    df = pd.read_excel("amz/scraped_offers.xlsx")
+    file_path = os.path.join(DATA_DIR, filename)
+
+    if not os.path.exists(file_path):
+        return HTMLResponse(content=f"<h1>File not found: {filename}</h1>", status_code=404)
+
+    df = pd.read_excel(file_path)
+
+    # Ensure price is numeric
     df["price"] = pd.to_numeric(df["price"], errors="coerce")
+
+    # Ensure review is numeric
+    df["reviews"] = pd.to_numeric(df["reviews"], errors="coerce")
+
+    # Filter by search keywords if provided
+    if search:
+        keywords = search.lower().split()
+        df = df[df["title"].str.lower().apply(lambda title: any(word in title for word in keywords))]
+
+    if df.empty:
+        return templates.TemplateResponse("visualization.html", {
+            "request": request,
+            "plot": None,
+            "items": "<h3>No data found.</h3>",
+        })
+
+    # Truncate long titles
     df["short_title"] = df["title"].apply(lambda x: x[:20] + "..." if len(x) > 20 else x)
 
-    fig = px.bar(
-        df, #.nlargest("price"),
-        y="short_title", 
-        x="price", 
-        color="price", 
+    # # Create chart
+    # fig = px.bar(
+    #     df,
+    #     y="short_title", 
+    #     x="price", 
+    #     color="price", 
+    #     hover_data={"short_title": False, "title": True},
+    # )
+
+    # Scatter
+    fig = px.scatter(
+        df,
+        x="reviews",
+        y="short_title",
+        color="reviews",
         hover_data={"short_title": False, "title": True},
-        # title="Top 10 Most Expensive Products"
+        size_max=50,
+        labels={
+            "reviews": "Popularność",
+            "short_title": "Tytuł",
+        },
+        width=1000,
+        height=600
+        # height=max(600, len(df) * 30),
     )
 
-    content = fig.to_html(full_html=True)
 
-    return HTMLResponse(content=content)
+    plot_html = fig.to_html(full_html=True)
+    # table_html = df.to_html(classes="table table-striped", index=False, escape=False)
+    items = df.to_dict(orient="records")
+
+    return templates.TemplateResponse("visualization.html", {
+            "request": request,
+            "plot": plot_html,
+            "items": items,
+        })
