@@ -18,18 +18,81 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 
-@app.get("/")
+@app.get("/scr")
 async def root(request: Request, response=HTMLResponse):
     return templates.TemplateResponse(
         request=request, name="home.html", context={"id": id}
     )
 
 
-@app.get("/bar")
+@app.get("/")
 async def root(request: Request, response=HTMLResponse):
     return templates.TemplateResponse(
         request=request, name="bar.html"
     )
+
+
+@app.get('/')
+async def visualization(request: Request,):
+
+    # file_path = os.path.join(DATA_DIR, filename)
+
+    # if not os.path.exists(file_path):
+    #     return HTMLResponse(content=f"<h1>File not found: {filename}</h1>", status_code=404)
+
+    filename = 'amz/Zabawki elektroniczne.xlsx'
+
+    df = pd.read_excel(filename)
+
+    df["index"] = range(len(df))
+
+    # Ensure price is numeric
+    df["price"] = pd.to_numeric(df["price"], errors="coerce")
+
+    # Ensure review is numeric
+    df["reviews"] = pd.to_numeric(df["reviews"], errors="coerce")
+
+    df["rating"] = pd.to_numeric(df["rating"], errors="coerce")
+
+    # df = df.sort_values(by="reviews", ascending=False)
+
+
+    if df.empty:
+        return templates.TemplateResponse("visualization.html", {
+            "request": request,
+            "plot": None,
+            "items": "<h3>No data found.</h3>",
+        })
+
+    # Truncate long titles
+    df["short_title"] = df["title"].apply(lambda x: x[:20] + "..." if len(x) > 20 else x)
+
+    # Scatter
+    fig = px.scatter(
+        df,
+        x="index",
+        y="short_title",
+        color="index",
+        hover_data={"title": True, "rating": True, "short_title": False, "index": False, },
+        size_max=50,
+        labels={
+            "short_title": "Tytuł",
+            # "reviews": "Popularność",
+            # "rating": "Ocena",
+        },
+        height=600
+    )
+
+
+    plot_html = fig.to_html(full_html=True)
+    # table_html = df.to_html(classes="table table-striped", index=False, escape=False)
+    items = df.to_dict(orient="records")
+
+    return templates.TemplateResponse("visualization.html", {
+            "request": request,
+            "plot": plot_html,
+            "items": items,
+        })
 
 
 @app.post("/scrape") 
@@ -71,11 +134,21 @@ async def visualization(request: Request, filename: str, search: str = Query(Non
 
     df = pd.read_excel(file_path)
 
+    df["index"] = range(len(df))
+
     # Ensure price is numeric
     df["price"] = pd.to_numeric(df["price"], errors="coerce")
 
     # Ensure review is numeric
     df["reviews"] = pd.to_numeric(df["reviews"], errors="coerce")
+
+    df["rating"] = pd.to_numeric(df["rating"], errors="coerce")
+
+    # Sort by reviews in descending order (most reviewed first)
+    # df = df.dropna(subset=["reviews"]).sort_values(by="reviews", ascending=False)
+    df = df.sort_values(by="reviews", ascending=False)
+
+
 
     # Filter by search keywords if provided
     if search:
@@ -104,18 +177,18 @@ async def visualization(request: Request, filename: str, search: str = Query(Non
     # Scatter
     fig = px.scatter(
         df,
-        x="reviews",
-        y="short_title",
+        x="index",
+        # y="short_title",
+        y="reviews",
         color="reviews",
-        hover_data={"short_title": False, "title": True},
+        hover_data={"title": True, "rating": True, "short_title": False, "index": False, },
         size_max=50,
         labels={
-            "reviews": "Popularność",
             "short_title": "Tytuł",
+            "reviews": "Popularność",
+            "rating": "Ocena",
         },
-        width=1000,
         height=600
-        # height=max(600, len(df) * 30),
     )
 
 
