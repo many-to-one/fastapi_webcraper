@@ -7,18 +7,19 @@ from openpyxl import load_workbook
 class ExampleSpider(scrapy.Spider):
     name = "amazon"
 
-    def __init__(self, url=None, category_name=None, *args, **kwargs):
+    def __init__(self, url=None, category_name=None, filter_by=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.base_url = url if url else "https://default-url.com"
         self.category_name = category_name
         self.current_page = 1
+        self.filter_by = filter_by
         self.scraped_urls = set()
         self.asins = set()
         self.data = []  # List to store all scraped offers
 
     def start_requests(self):
         print(' ############################### self.base_url ############################### ', self.base_url)
-        paginated_url = f"{self.base_url}&page={self.current_page}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank" # s=price-desc-rank (from highest price)
+        paginated_url = f"{self.base_url}&page={self.current_page}&ref=sr_nr_p_n_condition-type_1&s={self.filter_by}" # s=price-desc-rank (from highest price) s=popularity-rank
         headers = {"User-Agent": random.choice(self.settings.get("USER_AGENT"))}
         yield scrapy.Request(url=paginated_url, callback=self.parse, headers=headers)
 
@@ -29,10 +30,6 @@ class ExampleSpider(scrapy.Spider):
         import re, urllib.parse
 
         def extract_asin(url):
-            # if url[:5] == "/sspa":
-            #     decoded_url = urllib.parse.unquote(url)
-            #     match = re.search(r'/dp/([A-Z0-9]+)|/gp/product/([A-Z0-9]+)', decoded_url)
-            # else:
             match = re.search(r'/dp/([A-Z0-9]+)|/gp/product/([A-Z0-9]+)', url)
             if match:
                 return match.group(1) or match.group(2)  # Return the ASIN

@@ -35,11 +35,6 @@ async def root(request: Request, response=HTMLResponse):
 @app.get('/')
 async def visualization(request: Request,):
 
-    # file_path = os.path.join(DATA_DIR, filename)
-
-    # if not os.path.exists(file_path):
-    #     return HTMLResponse(content=f"<h1>File not found: {filename}</h1>", status_code=404)
-
     filename = 'amz/Zabawki elektroniczne.xlsx'
 
     df = pd.read_excel(filename)
@@ -96,7 +91,13 @@ async def visualization(request: Request,):
 
 
 @app.post("/scrape") 
-async def run_spider(background_tasks: BackgroundTasks, title: str = Form(...), category: str = Form(...), category_name: str = Form(...)): 
+async def run_spider(
+    background_tasks: BackgroundTasks, 
+    title: str = Form(...), 
+    category: str = Form(...), 
+    category_name: str = Form(...),
+    filter_by: str = Form(...),
+    ): 
 
     print(' ******************************* title ******************************* ', title)
 
@@ -118,14 +119,20 @@ async def run_spider(background_tasks: BackgroundTasks, title: str = Form(...), 
     # command = ["scrapy", "crawl", spider_name]
 
     # Pass the URL as an argument to the spider
-    command = ["scrapy", "crawl", spider_name, "-a", f"url={decoded_url}", "-a", f"category_name={category_name}"]
+    command = [
+        "scrapy", "crawl", 
+        spider_name,
+        "-a", f"url={decoded_url}", 
+        "-a", f"category_name={category_name}",
+        "-a", f"filter_by={filter_by}",
+        ]
 
     background_tasks.add_task(subprocess.Popen, command, cwd=SCRAPY_PROJECT_PATH) 
     return {"message": f"Started spider {spider_name}"}
 
 
 @app.get('/visualization/{filename}')
-async def visualization(request: Request, filename: str, search: str = Query(None)):
+async def visualization(request: Request, filename: str, search: str = Query(None), filter_by: str = Query(None)):
 
     file_path = os.path.join(DATA_DIR, filename)
 
@@ -146,7 +153,7 @@ async def visualization(request: Request, filename: str, search: str = Query(Non
 
     # Sort by reviews in descending order (most reviewed first)
     # df = df.dropna(subset=["reviews"]).sort_values(by="reviews", ascending=False)
-    df = df.sort_values(by="reviews", ascending=False)
+    df = df.sort_values(by=filter_by, ascending=False)
 
 
 

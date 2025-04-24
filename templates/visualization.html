@@ -64,8 +64,8 @@
         <div class="container">
             <div class="flex-row-jc-center">
                 <h1>📊 Offer Visualization</h1>
-                <select name="filter" id="filter">
-                    <option value="price">Cena</option>
+                <select name="filter_by" id="filter">
+                    <option value="price" selected>Cena</option>
                     <option value="reviews">Popularność</option>
                     <option value="rating">Ocena</option>
                 </select>
@@ -127,10 +127,12 @@
             event.preventDefault();
             var title = document.getElementById('title').value;
             var category = document.getElementById("selectedCat").value;
+            var filter = document.getElementById('filter').value;
             console.log('title', title);
             console.log('category:', category);
+            console.log('filter', filter);
 
-            window.location.href = `/visualization/${category}.xlsx?search=${title}`;
+            window.location.href = `/visualization/${category}.xlsx?search=${title}&filter_by=${filter}`;
         }
 
         function showCat(number) {
@@ -141,13 +143,14 @@
             } else {
                 subContent.style.display = "none";
             }
+
         }
 
         function setSubCat(category, number) {
             console.log('selected category:', category);
             document.getElementById("selectedCat").value = category;
-
             showCat(number);
+            showMenu();
         }
 
     </script>

@@ -48,6 +48,11 @@
 
             <input type="hidden" name="category" id="selectedCat" placeholder="Kategoria">
             <input type="text" name="title" placeholder="Szukaj" id="title">
+            <select name="filter_by" id="filter">
+                <option value="price" selected>Cena</option>
+                <option value="reviews">Popularność</option>
+                <option value="rating">Ocena</option>
+            </select>
             <button onclick="showVis()">Go</button>
         </div>
 
@@ -60,10 +65,11 @@
             event.preventDefault();
             var title = document.getElementById('title').value;
             var category = document.getElementById("selectedCat").value;
+            var filter = document.getElementById('filter').value;
             console.log('title', title);
             console.log('category:', category);
 
-            window.location.href = `/visualization/${category}.xlsx?search=${title}`;
+            window.location.href = `/visualization/${category}.xlsx?search=${title}&filter_by=${filter}`;
         }
 
         function showCat(number) {
