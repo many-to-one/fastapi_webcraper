@@ -25,11 +25,11 @@ async def root(request: Request, response=HTMLResponse):
     )
 
 
-@app.get("/")
-async def root(request: Request, response=HTMLResponse):
-    return templates.TemplateResponse(
-        request=request, name="bar.html"
-    )
+# @app.get("/")
+# async def root(request: Request, response=HTMLResponse):
+#     return templates.TemplateResponse(
+#         request=request, name="bar.html"
+#     )
 
 
 @app.get('/')
@@ -38,6 +38,7 @@ async def visualization(request: Request,):
     filename = 'amz/Zabawki elektroniczne.xlsx'
 
     df = pd.read_excel(filename)
+    df = df.head(100)
 
     df["index"] = range(len(df))
 
@@ -49,7 +50,7 @@ async def visualization(request: Request,):
 
     df["rating"] = pd.to_numeric(df["rating"], errors="coerce")
 
-    # df = df.sort_values(by="reviews", ascending=False)
+    df = df.sort_values(by="price", ascending=False)
 
 
     if df.empty:
@@ -65,10 +66,10 @@ async def visualization(request: Request,):
     # Scatter
     fig = px.scatter(
         df,
-        x="index",
+        x="price",
         y="short_title",
         color="index",
-        hover_data={"title": True, "rating": True, "short_title": False, "index": False, },
+        hover_data={"title": True, "price": True, "short_title": False, "index": False, },
         size_max=50,
         labels={
             "short_title": "Tytuł",
@@ -203,8 +204,19 @@ async def visualization(request: Request, filename: str, search: str = Query(Non
     # table_html = df.to_html(classes="table table-striped", index=False, escape=False)
     items = df.to_dict(orient="records")
 
+    option = ""
+
+    if filter_by == "price":
+        option = "Cena"
+    if filter_by == "reviews":
+        option == "Popularnośc"
+    if filter_by == "rating":
+        option == "Ocena"
+
     return templates.TemplateResponse("visualization.html", {
             "request": request,
             "plot": plot_html,
             "items": items,
+            "filter_by": option,
+            "filename": filename.rstrip(".xlsx"),
         })

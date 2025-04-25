@@ -1,9 +1,57 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    color: #333; /* Dark Gray */
+}
+
+h1 {
+    font-size: 28px;
+    font-weight: bold;
+    color: #2A9D8F;
+    text-transform: uppercase;
+    /* text-align: center; */
+}
+
+p {
+    line-height: 1.6; /* Better readability */
+    /* text-indent: 20px; */
+}
+
+h2 {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+h3 {
+    color: #1b7575;
+    font-style: italic;
+}
+
+.glow {
+    color: #F4A261;
+    text-shadow: 0 0 10px #F4A261;
+}
+
+a {
+    text-decoration: none;
+    color: #013834;
+    font-weight: bold;
+}
+
+a:hover {
+    color: #2A9D8F;
+    text-decoration: underline;
+}
+
+
+
 .flex-row-jc-center {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 20px;
 }
+
 
 .parent {
     display: flex;
@@ -19,19 +67,79 @@
     gap: 10px;
 }
 
+.vis-head {
+    background: linear-gradient(to right, #FFDEE9, #B5FFFC);
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 3;
+    height: 120px;
+}
+
 .search-form-vis {
+    position: sticky;
+    top: 0;
+    left: 0;
+    background: linear-gradient(to right, #FFDEE9, #B5FFFC);
+    z-index: 4;
+    margin-top: -60px;
+}
+
+.info {
+    position: sticky;
+    top: 70px;
+    text-align: center;
+    z-index: 4;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+#filter {
+    width: 200px;
+    padding: 6px;
+    font-size: 16px;
+    border: 2px solid #2A9D8F; /* Stylish border color */
+    border-radius: 5px; /* Rounded corners */
+    background: #F4F4F4; /* Light background */
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Style on hover */
+#filter:hover {
+    background: #E9F5F2; /* Soft hover effect */
+    border-color: #E76F51; /* Change border color */
+}
+
+/* Style when dropdown is opened */
+#filter:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(42, 157, 143, 0.6);
+}
+
+/* Custom option styling */
+#filter option {
+    font-size: 14px;
+    padding: 5px;
+    background: white;
+    color: #333;
+}
+
+#menu-icon {
     position: absolute;
     top: 0;
     left: 0;
-
+    z-index: 3;
+    margin-top: 50px;
+    margin-left: 20px;
 }
-
 #menu {
     position: fixed;
     top: 0;
     display: none;
     background-color: #ededed;
-    z-index: 1;
+    z-index: 4;
     overflow-y: auto;
     max-height: 80%;
     padding: 10px;

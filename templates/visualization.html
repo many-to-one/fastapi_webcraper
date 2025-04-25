@@ -14,47 +14,52 @@
 
         <form class="search-form-vis">
 
-            <p onclick="showMenu()">Menu</p>
+            <p id="menu-icon" onclick="showMenu()">Menu</p>
+
             <div id="menu" style="display: none; cursor: pointer;">
 
-            <div id="categoryId">
+                <div id="categoryId">
+                    <p class="close-menu" onclick="showMenu()">X</p>   
 
-                <p class="close-menu" onclick="showMenu()">X</p>
-                    
-                    <p onclick="showCat(3)">Dziecko, zabawki i gry</p>
+                        <p onclick="showCat(3)">Dziecko, zabawki i gry</p>
 
-                    <div id="accordion-content-3" class="accordion-content" style="display: none;">
-                        <h4>Zabawki i gry</h4>
-                        <p onclick="setSubCat('Figurki do zabaw', 3)">Figurki do zabaw</p>
-                        <p onclick="setSubCat('Gry i akcesoria do gier', 3)">Gry i akcesoria do gier</p>
-                        <p onclick="setSubCat('Lalki i akcesoria', 3)">Lalki i akcesoria</p>
-                        <p onclick="setSubCat('Maskotki i pluszaki', 3)">Maskotki i pluszaki</p>
-                        <p onclick="setSubCat('Pacynki i teatrzyki kukiełkowe', 3)">Pacynki i teatrzyki kukiełkowe</p>
-                        <p onclick="setSubCat('Plastyka', 3)">Plastyka</p>
-                        <p onclick="setSubCat('Pojazdy zabawkowe')">Pojazdy zabawkowe</p>
-                        <p onclick="setSubCat('Produkty do zabawy w przebieranki i udawanie')">Produkty do zabawy w przebieranki i udawanie</p>
-                        <p onclick="setSubCat('Puzzle, łamigłówki i akcesoria')">Puzzle, łamigłówki i akcesoria</p>
-                        <p onclick="setSubCat('Sport i turystyka')">Sport i turystyka</p>
-                        <p onclick="setSubCat('Śmieszne i nowatorskie zabawki')">Śmieszne i nowatorskie zabawki</p>
-                        <p onclick="setSubCat('Zabawki dla małych dzieci i niemowląt')">Zabawki dla małych dzieci i niemowląt</p>
-                        <p onclick="setSubCat('Zabawki do nauki i edukacji')">Zabawki do nauki i edukacji</p>
-                        <p onclick="setSubCat('Zabawki elektroniczne')">Zabawki elektroniczne</p>
-                        <p onclick="setSubCat('Zabawki kolekcjonerskie')">Zabawki kolekcjonerskie</p>
-                        <p onclick="setSubCat('Zabawki konstrukcyjne i do budowania')">Zabawki konstrukcyjne i do budowania</p>
-                        <p onclick="setSubCat('Zabawkowe instrumenty muzyczne')">Zabawkowe instrumenty muzyczne</p>
-                        <p onclick="setSubCat('Zdalnie sterowane zabawki', 3)">Zdalnie sterowane zabawki</p>
-                        <h4>Dziecko</h4>
-                        <p onclick="setSubCat('Odzież i obuwie')">Odzież i obuwie</p>
-                        <p onclick="setSubCat('Foteliki samochodowe i akcesoria')">Foteliki samochodowe i akcesoria</p>
-                        <p onclick="setSubCat('Nianie elektroniczne')">Nianie elektroniczne</p>
-                        <p onclick="setSubCat('Nosidełka dla dzieci')">Nosidełka dla dzieci</p>
-                        <p onclick="setSubCat('Karmienie dziecka')">Karmienie dziecka</p>
-                        <p onclick="setSubCat('Wózki, spacerówki i akcesoria')">Wózki, spacerówki i akcesoria</p>
-                        <p onclick="setSubCat('Pokój dziecięcy')">Pokój dziecięcy</p>
-                        <p onclick="setSubCat('Przewijanie niemowląt')">Przewijanie niemowląt</p>
+                        <div id="accordion-content-3" class="accordion-content" style="display: none;">
+                            <div>
+                                <h1 onclick="showCat(3)"><</h1>
+                                <h4>Zabawki i gry</h4>
+                            </div>
+                            <p onclick="setSubCat('Figurki do zabaw', 3)">Figurki do zabaw</p>
+                            <p onclick="setSubCat('Gry i akcesoria do gier', 3)">Gry i akcesoria do gier</p>
+                            <p onclick="setSubCat('Lalki i akcesoria', 3)">Lalki i akcesoria</p>
+                            <p onclick="setSubCat('Maskotki i pluszaki', 3)">Maskotki i pluszaki</p>
+                            <p onclick="setSubCat('Pacynki i teatrzyki kukiełkowe', 3)">Pacynki i teatrzyki kukiełkowe</p>
+                            <p onclick="setSubCat('Plastyka', 3)">Plastyka</p>
+                            <p onclick="setSubCat('Pojazdy zabawkowe')">Pojazdy zabawkowe</p>
+                            <p onclick="setSubCat('Produkty do zabawy w przebieranki i udawanie')">Produkty do zabawy w przebieranki i udawanie</p>
+                            <p onclick="setSubCat('Puzzle, łamigłówki i akcesoria')">Puzzle, łamigłówki i akcesoria</p>
+                            <p onclick="setSubCat('Sport i turystyka')">Sport i turystyka</p>
+                            <p onclick="setSubCat('Śmieszne i nowatorskie zabawki')">Śmieszne i nowatorskie zabawki</p>
+                            <p onclick="setSubCat('Zabawki dla małych dzieci i niemowląt')">Zabawki dla małych dzieci i niemowląt</p>
+                            <p onclick="setSubCat('Zabawki do nauki i edukacji')">Zabawki do nauki i edukacji</p>
+                            <p onclick="setSubCat('Zabawki elektroniczne', 3)">Zabawki elektroniczne</p>
+                            <p onclick="setSubCat('Zabawki kolekcjonerskie')">Zabawki kolekcjonerskie</p>
+                            <p onclick="setSubCat('Zabawki konstrukcyjne i do budowania')">Zabawki konstrukcyjne i do budowania</p>
+                            <p onclick="setSubCat('Zabawkowe instrumenty muzyczne')">Zabawkowe instrumenty muzyczne</p>
+                            <p onclick="setSubCat('Zdalnie sterowane zabawki', 3)">Zdalnie sterowane zabawki</p>
+                            <h4>Dziecko</h4>
+                            <p onclick="setSubCat('Odzież i obuwie')">Odzież i obuwie</p>
+                            <p onclick="setSubCat('Foteliki samochodowe i akcesoria')">Foteliki samochodowe i akcesoria</p>
+                            <p onclick="setSubCat('Nianie elektroniczne')">Nianie elektroniczne</p>
+                            <p onclick="setSubCat('Nosidełka dla dzieci')">Nosidełka dla dzieci</p>
+                            <p onclick="setSubCat('Karmienie dziecka')">Karmienie dziecka</p>
+                            <p onclick="setSubCat('Wózki, spacerówki i akcesoria')">Wózki, spacerówki i akcesoria</p>
+                            <p onclick="setSubCat('Pokój dziecięcy')">Pokój dziecięcy</p>
+                            <p onclick="setSubCat('Przewijanie niemowląt')">Przewijanie niemowląt</p>
+                        </div>
+
                     </div>
                 </div>
-            </div>
+
             </div>
 
         </form>
@@ -62,19 +67,23 @@
 
 
         <div class="container">
-            <div class="flex-row-jc-center">
+            <div class="flex-row-jc-center vis-head">
                 <h1>📊 Offer Visualization</h1>
+                <input type="hidden" name="category" id="selectedCat" placeholder="Kategoria">
+                <input type="text" name="title" placeholder="Szukaj" id="title">
+
                 <select name="filter_by" id="filter">
-                    <option value="price" selected>Cena</option>
+                    <option id="sel_opt" value="price" disabled selected>Wybierz filtr</option>
+                    <option value="price">Cena</option>
                     <option value="reviews">Popularność</option>
                     <option value="rating">Ocena</option>
                 </select>
-                <input type="hidden" name="category" id="selectedCat" placeholder="Kategoria">
-                <input type="text" name="title" placeholder="Szukaj" id="title">
+                              
                 <button onclick="showVis()">Go</button>
             </div>
 
-            <div style="text-align: center;">
+            <div class="info">
+                <h3 id="selected_category">{{ filename }}</h3>
                 {% if items %}
                     <h3>Liczba ofert: {{ items | length }}</h3>
                 {% endif %}
@@ -110,50 +119,20 @@
 
 
 
+    <script src="/static/js/visualization.js"></script>
     <script>
-
-        function showMenu() {
-            const subContent = document.getElementById('menu');
-
-            if (subContent.style.display === "none" || subContent.style.display === "") {
-                subContent.style.display = "block";
-            } else {
-                subContent.style.display = "none";
-            }
-        }
-
-        function showVis() {
-
-            event.preventDefault();
-            var title = document.getElementById('title').value;
-            var category = document.getElementById("selectedCat").value;
-            var filter = document.getElementById('filter').value;
-            console.log('title', title);
-            console.log('category:', category);
-            console.log('filter', filter);
-
-            window.location.href = `/visualization/${category}.xlsx?search=${title}&filter_by=${filter}`;
-        }
-
-        function showCat(number) {
-            const subContent = document.getElementById(`accordion-content-${number}`);
-
-            if (subContent.style.display === "none" || subContent.style.display === "") {
-                subContent.style.display = "block";
-            } else {
-                subContent.style.display = "none";
-            }
-
-        }
 
         function setSubCat(category, number) {
             console.log('selected category:', category);
             document.getElementById("selectedCat").value = category;
+            var selected_category = document.getElementById('selected_category');
+            selected_category.innerHTML = category;
             showCat(number);
             showMenu();
+            showVis();
         }
 
-    </script>
+     </script>
 
 </body>
 </html>
