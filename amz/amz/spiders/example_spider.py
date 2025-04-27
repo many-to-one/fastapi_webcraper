@@ -1,3 +1,4 @@
+import os
 import scrapy, time, openpyxl, random
 import pandas as pd
 from openpyxl import load_workbook
@@ -97,12 +98,12 @@ class ExampleSpider(scrapy.Spider):
         if new_products_found:
             self.current_page += 1
             next_page_url = f"{self.base_url}&page={self.current_page}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank"
-            random_delay = random.uniform(3, 12) 
+            random_delay = random.uniform(3, 4) #random.uniform(3, 12) 
 
             if self.current_page % 10 == 0:
             # if self.current_page == 2:
                 self.save_to_excel()
-                long_random_delay = random.uniform(60, 120)
+                long_random_delay = random.uniform(4, 5) # random.uniform(60, 120)
                 time.sleep(long_random_delay)  # Longer delay every 20 pages
                 self.logger.info(f" ************* LONG DELAY {long_random_delay} seconds at {self.current_page} page ************* ")
 
@@ -120,7 +121,13 @@ class ExampleSpider(scrapy.Spider):
 
 
     def save_to_excel(self):
+
+        DATA_DIR = f"amz/{self.category_name}/{time.strftime('%Y-%m-%d')}/"
+        os.makedirs(DATA_DIR, exist_ok=True)
+
         filename = f"{self.category_name}.xlsx"
+
+        file_path = os.path.join(DATA_DIR, filename)
 
         # Convert data to a Pandas DataFrame
         df = pd.DataFrame(self.data)
@@ -136,7 +143,7 @@ class ExampleSpider(scrapy.Spider):
 
         try:
             # Load existing workbook
-            workbook = load_workbook(filename)
+            workbook = load_workbook(file_path)
             sheet = workbook.active
 
             # Read existing ASINs to avoid duplicates
@@ -152,14 +159,14 @@ class ExampleSpider(scrapy.Spider):
                 sheet.append(row.tolist())
 
             # Save changes
-            workbook.save(filename)
+            workbook.save(file_path)
 
-            self.logger.info(f"Data saved to '{filename}', only unique ASINs recorded.")
+            self.logger.info(f"Data saved to '{file_path}', only unique ASINs recorded.")
             self.data = []  # Clear the data list after saving
 
         except FileNotFoundError:
             # If file doesn't exist, create a new one with unique ASINs
-            sorted_df.to_excel(filename, index=False, engine="openpyxl")
+            sorted_df.to_excel(file_path, index=False, engine="openpyxl")
 
 
 

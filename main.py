@@ -91,18 +91,26 @@ async def visualization(request: Request,):
         })
 
 
-@app.post("/scrape") 
+@app.get("/scrape/{category}") 
 async def run_spider(
+    request: Request, 
     background_tasks: BackgroundTasks, 
-    title: str = Form(...), 
-    category: str = Form(...), 
-    category_name: str = Form(...),
-    filter_by: str = Form(...),
+    category: str,
+    title: str = Query(None),
+    category_name: str = Query(None),
+    filter_by: str = Query(None),
+    # title: str = Form(...), 
+    # category: str = Form(...), 
+    # category_name: str = Form(...),
+    # filter_by: str = Form(...),
     ): 
 
+    print(' ******************************* category ******************************* ', category)
     print(' ******************************* title ******************************* ', title)
+    print(' ******************************* category_name ******************************* ', category_name)
+    print(' ******************************* filter_by ******************************* ', filter_by)
 
-    if title == "":
+    if title == None:
         decoded_url = f"https://www.amazon.pl/s?i={category}"
     else:
         decoded_url = f"https://www.amazon.pl/s?k={title}&i={category}"
@@ -201,22 +209,14 @@ async def visualization(request: Request, filename: str, search: str = Query(Non
 
 
     plot_html = fig.to_html(full_html=True)
+    # .xlsx table to html table:
     # table_html = df.to_html(classes="table table-striped", index=False, escape=False)
     items = df.to_dict(orient="records")
-
-    option = ""
-
-    if filter_by == "price":
-        option = "Cena"
-    if filter_by == "reviews":
-        option == "Popularnośc"
-    if filter_by == "rating":
-        option == "Ocena"
 
     return templates.TemplateResponse("visualization.html", {
             "request": request,
             "plot": plot_html,
             "items": items,
-            "filter_by": option,
+            # "filter_by": option,
             "filename": filename.rstrip(".xlsx"),
         })

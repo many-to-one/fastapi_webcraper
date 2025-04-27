@@ -65,9 +65,17 @@ document.getElementById("filter").addEventListener("change", function () {
 document.addEventListener("DOMContentLoaded", function () {
     let urlParam = new URLSearchParams(window.location.search)
     let filterBy = urlParam.get("filter_by")
+    let filterName;
     if (filterBy) {
         let selOpt = document.getElementById("sel_opt");
-        selOpt.textContent = filterBy; // Update displayed text
+        if (filterBy === "reviews") {
+            filterName = "Popularnośc";
+        } else if (filterBy === "price") {
+            filterName = "Cena";
+        } else if (filterBy === "rating") {
+            filterName = "Ocena";
+        }
+        selOpt.textContent = filterName; // Update displayed text
         selOpt.value = filterBy; // Update value
     }
 })
