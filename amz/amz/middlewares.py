@@ -7,6 +7,10 @@ from scrapy import signals
 
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
+import json
+
+
+import os
 
 
 class AmzSpiderMiddleware:
@@ -103,22 +107,115 @@ class AmzDownloaderMiddleware:
         spider.logger.info("Spider opened: %s" % spider.name)
 
 
-DOWNLOADER_MIDDLEWARES = { 
-    'scraper.middlewares.RotateUserAgentMiddleware': 400, 
-    'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 750, 
-    }
+# DOWNLOADER_MIDDLEWARES = { 
+#     'scraper.middlewares.RotateUserAgentMiddleware': 400, 
+#     'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 750, 
+#     }
 
-USER_AGENTS = [ "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36", 
-               "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36", ]
-PROXIES = [ "http://user:pass@proxy1.com:8000", "http://user:pass@proxy2.com:8080", ]
+# USER_AGENTS = [ "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36", 
+#                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36", ]
+# PROXIES = [ "http://user:pass@proxy1.com:8000", "http://user:pass@proxy2.com:8080", ]
 
 
 
-import random 
-from scrapy import signals
+# import random 
 
-class RotateUserAgentMiddleware: 
-    def process_request(self, request, spider): 
-        request.headers['User-Agent'] = random.choice(USER_AGENTS) 
-        request.meta['proxy'] = random.choice(PROXIES)
+# class RotateUserAgentMiddleware: 
+#     def process_request(self, request, spider): 
+#         request.headers['User-Agent'] = random.choice(USER_AGENTS) 
+#         request.meta['proxy'] = random.choice(PROXIES)
 
+
+from rotating_proxies.middlewares import RotatingProxyMiddleware
+from rotating_proxies.middlewares import BanDetectionMiddleware
+import random
+
+class CustomRotatingProxyMiddleware(RotatingProxyMiddleware):
+
+    def load_proxies(self):
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        proxy_file = os.path.join(base_dir, 'proxies.txt')
+        with open(proxy_file) as f:
+            return [line.strip() for line in f if line.strip()]
+    
+    def process_response(self, request, response, spider):
+        # Call parent RotatingProxyMiddleware
+        result = super().process_response(request, response, spider)
+
+        # Custom logic: If banned a lot, reload proxies
+        if self.stats.get_value('rotating_proxies/proxies_left', 0) < 3:
+            spider.logger.warning("⚠️ Too few proxies left, reloading proxy list...")
+
+            # (Re)load proxy list (you can read from file, or API)
+            self.proxies = self.load_proxies()
+            self.stats.set_value('rotating_proxies/proxies_left', len(self.proxies))
+        
+        return result
+    
+
+
+class DynamicAutoThrottleMiddleware:
+
+    def __init__(self):
+        self.delay = 0.5  # start small
+        self.success_counter = 0
+        self.ban_counter = 0
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        mw = cls()
+        crawler.signals.connect(mw.response_received, signal=signals.response_received)
+        return mw
+
+    def response_received(self, response, request, spider):
+        if response.status in [403, 429]:
+            self.ban_counter += 1
+        else:
+            self.success_counter += 1
+
+        total = self.success_counter + self.ban_counter
+        if total >= 20:  # check every 20 requests
+            success_rate = self.success_counter / total
+            if success_rate < 0.7:
+                self.delay = min(self.delay + 0.2, 10)  # slower if bad
+            else:
+                self.delay = max(self.delay - 0.1, 0.5)  # faster if good
+            
+            spider.crawler.settings.set('DOWNLOAD_DELAY', self.delay, priority='spider')
+            spider.logger.info(f"Dynamic delay adjusted to {self.delay:.2f}s (success rate {success_rate:.2%})")
+
+            # reset
+            self.success_counter = 0
+            self.ban_counter = 0
+
+
+
+class ProxyStatsMiddleware:
+
+    def __init__(self):
+        self.proxy_usage = {}  # {proxy: {"ok": int, "ban": int}}
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        mw = cls()
+        crawler.signals.connect(mw.response_received, signal=signals.response_received)
+        crawler.signals.connect(mw.spider_closed, signal=signals.spider_closed)
+        crawler.settings = crawler.settings
+        return mw
+
+    def response_received(self, response, request, spider):
+        proxy = request.meta.get('proxy')
+        if not proxy:
+            return
+
+        if proxy not in self.proxy_usage:
+            self.proxy_usage[proxy] = {"ok": 0, "ban": 0}
+
+        if response.status in [403, 429]:  # Ban detection
+            self.proxy_usage[proxy]["ban"] += 1
+        else:
+            self.proxy_usage[proxy]["ok"] += 1
+
+    def spider_closed(self, spider):       
+        with open('proxy_stats.json', 'w') as f:
+            json.dump(self.proxy_usage, f)

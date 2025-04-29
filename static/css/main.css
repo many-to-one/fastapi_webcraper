@@ -96,7 +96,7 @@ a:hover {
     gap: 20px;
 }
 
-#filter {
+#filter, #date {
     width: 200px;
     padding: 6px;
     font-size: 16px;

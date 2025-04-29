@@ -17,7 +17,7 @@ function showVis() {
     console.log('category:', category);
     console.log('filter', filter);
 
-    window.location.href = `/visualization/${category}.xlsx?search=${title}&filter_by=${filter}`;
+    window.location.href = `/visualization/${category}?search=${title}&filter_by=${filter}`;
 }
 
 function showCat(number) {
@@ -42,9 +42,12 @@ function showCat(number) {
 // }
 
 
-// DINAMICALY FILTER OFFERS BY CHANGING SELECTED OPTION
+// DINAMICALY FILTER OFFERS BY CHANGING SELECTED FILTER OPTION
 document.getElementById("filter").addEventListener("change", function () {
     let selectedFilter = this.value; // Get selected filter value
+    let date = document.getElementById('date').value;
+
+    console.log('selectedFilter', selectedFilter)
 
     // Get current URL and extract category filename
     let currentUrl = new URL(window.location.href);
@@ -57,7 +60,28 @@ document.getElementById("filter").addEventListener("change", function () {
         let searchParam = currentUrl.searchParams.get("search") || ""; // Keep existing search value
 
         // Redirect with updated filter and search query
-        window.location.href = `/visualization/${categoryName}.xlsx?search=${encodeURIComponent(searchParam)}&filter_by=${selectedFilter}`;
+        window.location.href = `/visualization/${categoryName}?search=${encodeURIComponent(searchParam)}&filter_by=${selectedFilter}&date=${date}`;
+    }
+});
+
+
+// DINAMICALY FILTER OFFERS BY CHANGING SELECTED DAY OPTION
+document.getElementById("date").addEventListener("change", function () {
+    let selectedFilter = this.value; // Get selected filter value
+    let filter = document.getElementById('date').value;
+
+    // Get current URL and extract category filename
+    let currentUrl = new URL(window.location.href);
+    let match = currentUrl.pathname.match(/visualization\/(.*?)\.xlsx/); // Extract category from URL
+
+    if (match) {
+        let categoryName = match[1]; // Get the category name
+
+        // Preserve search parameter if it exists
+        let searchParam = currentUrl.searchParams.get("search") || ""; // Keep existing search value
+
+        // Redirect with updated filter and search query
+        window.location.href = `/visualization/${categoryName}?search=${encodeURIComponent(searchParam)}&filter_by=${filter}&date=${selectedFilter}`;
     }
 });
 
@@ -79,3 +103,4 @@ document.addEventListener("DOMContentLoaded", function () {
         selOpt.value = filterBy; // Update value
     }
 })
+

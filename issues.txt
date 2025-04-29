@@ -1,0 +1,1 @@
+sudo chown -R $USER /path/to/your/file(or directory) - for logged user

@@ -12,58 +12,100 @@ BOT_NAME = "amz"
 SPIDER_MODULES = ["amz.spiders"]
 NEWSPIDER_MODULE = "amz.spiders"
 
-ROBOTSTXT_OBEY = False
+ROBOTSTXT_OBEY = False 
 
-RETRY_HTTP_CODES = ["403", "500", "502", "503", "504"]
+RETRY_TIMES = 10
+RETRY_HTTP_CODES = ["403", "408", "429", "500", "502", "503", "504", "522", "524",]
+ROTATING_PROXY_PAGE_RETRY_TIMES  = 5
+ROTATING_PROXY_LOGSTATS_INTERVAL = 5
+# Do not close spider if all proxies are dead
+ROTATING_PROXY_CLOSE_SPIDER = False
 
-ROTATING_PROXY_LIST = [
-            '50.218.224.35:80',
-            '50.218.57.74:80',
-            '68.185.57.66:80',
-            '50.174.145.15:80',
-            '50.172.75.121:80',
-            '50.207.199.86:80',
-            '50.168.72.119:80',
-            '50.217.226.44:80',
-            '5.189.184.6:80',
-            '195.23.57.78:80',
-            '89.22.120.116:80',
-            '50.223.239.183:80',
-            '34.122.187.196:80',
-            '50.174.145.12:80',
-            '50.207.199.87:80',
-            '50.169.135.10:80',
-            '50.174.7.158:80',
-            '50.168.72.118:80',
-            '104.225.220.233:80',
-            '23.254.231.55:80',
-            '116.203.28.43:80',
-            '51.254.69.243:3128',
-            '81.171.24.199:3128',
-            '92.184.98.18',
-            '91.17.41.165',
-            '213.208.147.60',
-            '35.181.5.76',
-            '81.203.209.145',
-            '5.1.37.186',
-            '35.181.5.76',
-            '81.203.209.145',
-            '212.216.251.32',
-            '46.24.220.241',
-            '46.24.220.241',
-            '5.90.197.189',
-            '88.95.238.63',
-            '2.234.146.59',
-            '95.237.33.36',
-            '88.229.251.12',
-            '178.240.25.127',
-            '46.175.234.73',
-        ],
+# def load_proxies():
+#     with open('proxies.txt') as f:
+#         return [line.strip() for line in f.readlines() if line.strip()]
+
+import os
+
+def load_proxies():
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    proxy_file = os.path.join(base_dir, 'proxies.txt')
+    with open(proxy_file) as f:
+        return [line.strip() for line in f if line.strip()]
+
+
+
+    
+ROTATING_PROXY_LIST = load_proxies()
+
+
+# ROTATING_PROXY_LIST = [
+#             '50.218.224.35:80',
+#             '50.218.57.74:80',
+#             '68.185.57.66:80',
+#             '50.174.145.15:80',
+#             '50.172.75.121:80',
+#             '50.207.199.86:80',
+#             '50.168.72.119:80',
+#             '50.217.226.44:80',
+#             '5.189.184.6:80',
+#             '195.23.57.78:80',
+#             '89.22.120.116:80',
+#             '50.223.239.183:80',
+#             '34.122.187.196:80',
+#             '50.174.145.12:80',
+#             '50.207.199.87:80',
+#             '50.169.135.10:80',
+#             '50.174.7.158:80',
+#             '50.168.72.118:80',
+#             '104.225.220.233:80',
+#             '23.254.231.55:80',
+#             '116.203.28.43:80',
+#             '51.254.69.243:3128',
+#             '81.171.24.199:3128',
+#             '92.184.98.18',
+#             '91.17.41.165',
+#             '213.208.147.60',
+#             '35.181.5.76',
+#             '81.203.209.145',
+#             '5.1.37.186',
+#             '35.181.5.76',
+#             '81.203.209.145',
+#             '212.216.251.32',
+#             '46.24.220.241',
+#             '46.24.220.241',
+#             '5.90.197.189',
+#             '88.95.238.63',
+#             '2.234.146.59',
+#             '95.237.33.36',
+#             '88.229.251.12',
+#             '178.240.25.127',
+#             '46.175.234.73',
+#             '88.51.201.143',
+#             '82.27.23.255',
+#             '2.138.149.1',
+#             '87.163.177.84',
+#             '46.137.108.160',
+#             '87.116.36.189',
+#             '178.246.20.217',
+#             '109.232.227.10',
+#             '94.254.179.181',
+#             '94.53.108.255',
+#             '88.51.201.143',
+#             '82.27.23.255',
+#             '94.136.132.11',
+#             '2.138.149.1',
+#             '87.163.177.84',
+#             '46.137.108.160',
+#         ],
 DOWNLOADER_MIDDLEWARES = {
     'scrapy.downloadermiddlewares.retry.RetryMiddleware': 90,
     'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 110,
 #     'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
-#     'scrapy_user_agents.middlewares.RandomUserAgentMiddleware': 400,
+    # 'amz.middlewares.CustomRotatingProxyMiddleware': 610,
+    'rotating_proxies.middlewares.BanDetectionMiddleware': 620,
+    'scrapy_user_agents.middlewares.RandomUserAgentMiddleware': 400,
+    'amz.middlewares.DynamicAutoThrottleMiddleware': 700, 
 }
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
@@ -86,6 +128,7 @@ ROBOTSTXT_OBEY = False #True
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 CONCURRENT_REQUESTS = 32
+CONCURRENT_SPIDERS = 2
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -133,11 +176,11 @@ COOKIES_ENABLED = False
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
-AUTOTHROTTLE_ENABLED = True
+AUTOTHROTTLE_ENABLED = False # Because I'm using custom DynamicAutoThrottleMiddleware. To use default AutoThrottleMiddleware set up to True
 # The initial download delay
-AUTOTHROTTLE_START_DELAY = 5
+AUTOTHROTTLE_START_DELAY = 1.0
 # The maximum download delay to be set in case of high latencies
-AUTOTHROTTLE_MAX_DELAY = 60
+AUTOTHROTTLE_MAX_DELAY = 10
 # The average number of requests Scrapy should be sending in parallel to
 # each remote server
 AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0

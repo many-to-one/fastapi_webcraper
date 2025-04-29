@@ -1,8 +1,7 @@
-import os
+import os, requests
 import scrapy, time, openpyxl, random
 import pandas as pd
 from openpyxl import load_workbook
-
 
 
 class ExampleSpider(scrapy.Spider):
@@ -21,8 +20,13 @@ class ExampleSpider(scrapy.Spider):
     def start_requests(self):
         print(' ############################### self.base_url ############################### ', self.base_url)
         paginated_url = f"{self.base_url}&page={self.current_page}&ref=sr_nr_p_n_condition-type_1&s={self.filter_by}" # s=price-desc-rank (from highest price) s=popularity-rank
-        headers = {"User-Agent": random.choice(self.settings.get("USER_AGENT"))}
-        yield scrapy.Request(url=paginated_url, callback=self.parse, headers=headers)
+        yield scrapy.Request(
+            url=paginated_url,
+            callback=self.parse
+        )
+        # or manualy random User-Agent logic:
+        # headers = {"User-Agent": random.choice(self.settings.get("USER_AGENT"))}
+        # yield scrapy.Request(url=paginated_url, callback=self.parse, headers=headers)
 
     def parse(self, response):
         products = response.css('div.s-main-slot div.s-result-item')
@@ -98,12 +102,13 @@ class ExampleSpider(scrapy.Spider):
         if new_products_found:
             self.current_page += 1
             next_page_url = f"{self.base_url}&page={self.current_page}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank"
-            random_delay = random.uniform(3, 4) #random.uniform(3, 12) 
+            random_delay = random.uniform(1, 2) #random.uniform(3, 12) 
+            yield scrapy.Request(url=next_page_url, callback=self.parse)
 
             if self.current_page % 10 == 0:
-            # if self.current_page == 2:
+            # # if self.current_page == 2:
                 self.save_to_excel()
-                long_random_delay = random.uniform(4, 5) # random.uniform(60, 120)
+                long_random_delay = random.uniform(1, 2) # random.uniform(60, 120)
                 time.sleep(long_random_delay)  # Longer delay every 20 pages
                 self.logger.info(f" ************* LONG DELAY {long_random_delay} seconds at {self.current_page} page ************* ")
 
@@ -122,7 +127,7 @@ class ExampleSpider(scrapy.Spider):
 
     def save_to_excel(self):
 
-        DATA_DIR = f"amz/{self.category_name}/{time.strftime('%Y-%m-%d')}/"
+        DATA_DIR = f"amz/products/{self.category_name}/{time.strftime('%Y-%m-%d')}/"
         os.makedirs(DATA_DIR, exist_ok=True)
 
         filename = f"{self.category_name}.xlsx"
