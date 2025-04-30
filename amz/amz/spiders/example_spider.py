@@ -85,6 +85,7 @@ class ExampleSpider(scrapy.Spider):
                     'rating': product.css('span.a-icon-alt::text').get(),
                     'reviews': product.css('span.a-size-base::text').get(),  
                     'url': product_url,
+                    'first_availability_date': response.css('table.a-normal td::text').re_first(r'\d{4}-\d{2}-\d{2}')
                 }
 
                 count += 1

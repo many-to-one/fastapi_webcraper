@@ -1,4 +1,5 @@
 import time
+from datetime import datetime, timedelta
 from fastapi import FastAPI, BackgroundTasks, Request, Form, Query
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -32,18 +33,37 @@ async def root(request: Request, response=HTMLResponse):
 @app.get('/')
 async def visualization(request: Request,):
 
-    filename = 'amz/Zabawki elektroniczne.xlsx'
+    # filename = 'amz/Zabawki elektroniczne.xlsx'
+    category = "Zabawki elektroniczne"
+    base_path = f"amz/amz/products/{category}/"
+    # Get all date folders
+    date_folders = [d for d in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, d))]
+    valid_dates = [d for d in date_folders if d.count("-") == 2]
+    latest_date = max(valid_dates, key=lambda x: datetime.strptime(x, "%Y-%m-%d"))
 
-    df = pd.read_excel(filename)
+    DATA_DIR = f"amz/amz/products/{category}/{latest_date}"
+    
+    filename = f"{category}.xlsx"
+    file_path = os.path.join(DATA_DIR, filename)
+
+    df = pd.read_excel(file_path)
     df = df.head(100)
 
     df["index"] = range(len(df))
 
     # Ensure price is numeric
-    df["price"] = pd.to_numeric(df["price"], errors="coerce")
+    # df["price"] = pd.to_numeric(df["price"], errors="coerce")
 
     # Ensure review is numeric
-    df["reviews"] = pd.to_numeric(df["reviews"], errors="coerce")
+    # df["reviews"] = pd.to_numeric(df["reviews"], errors="coerce")
+
+    df["price"] = df["price"].astype(str).str.replace(r"\D", "", regex=True)  # Remove non-numeric characters
+    df["price"] = pd.to_numeric(df["price"], errors="coerce").fillna(0)
+
+    # Ensure review is numeric
+    # df["reviews"] = pd.to_numeric(df["reviews"], errors="coerce").fillna(0)
+    df["reviews"] = df["reviews"].astype(str).str.replace(r"\D", "", regex=True)  # Remove non-numeric characters
+    df["reviews"] = pd.to_numeric(df["reviews"], errors="coerce").fillna(0)
 
     df["rating"] = pd.to_numeric(df["rating"], errors="coerce")
 
@@ -138,12 +158,28 @@ async def run_spider(
 
 
 @app.get('/visualization/{category}')
-async def visualization(request: Request, category: str, search: str = Query(None), filter_by: str = Query(None), date: str = Query(None)):
+async def visualization(
+    request: Request, 
+    category: str, 
+    search: str = Query(None), 
+    filter_by: str = Query(None), 
+    ):
 
-    date_ = None
-    if date == 'one':
-        date_ = time.strftime('%Y-%m-%d')
-    DATA_DIR = f"amz/amz/products/{category}/{date_}"
+    # print(' ********************* DATE ******************** ', date)
+    print(' ********************* category ******************** ', category)
+
+    if category:
+        base_path = f"amz/amz/products/{category}/"
+        # Get all date folders
+        date_folders = [d for d in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, d))]
+        valid_dates = [d for d in date_folders if d.count("-") == 2]
+
+        latest_date = max(valid_dates, key=lambda x: datetime.strptime(x, "%Y-%m-%d"))
+        print(' ********************* latest_date ******************** ', latest_date)
+    else:
+        print(' ********************* no category ******************** ')
+
+    DATA_DIR = f"amz/amz/products/{category}/{latest_date}"
     
     filename = f"{category}.xlsx"
     file_path = os.path.join(DATA_DIR, filename)
@@ -157,9 +193,11 @@ async def visualization(request: Request, category: str, search: str = Query(Non
     df["index"] = range(len(df))
 
     # Ensure price is numeric
+    df["price"] = df["price"].astype(str).str.replace(r"\D", "", regex=True)  # Remove non-numeric characters
     df["price"] = pd.to_numeric(df["price"], errors="coerce").fillna(0)
 
     # Ensure review is numeric
+    df["reviews"] = df["reviews"].astype(str).str.replace(r"\D", "", regex=True)  # Remove non-numeric characters
     df["reviews"] = pd.to_numeric(df["reviews"], errors="coerce").fillna(0)
 
     df["rating"] = pd.to_numeric(df["rating"], errors="coerce").fillna(0)
@@ -167,8 +205,6 @@ async def visualization(request: Request, category: str, search: str = Query(Non
     # Sort by reviews in descending order (most reviewed first)
     # df = df.dropna(subset=["reviews"]).sort_values(by="reviews", ascending=False)
     df = df.sort_values(by=filter_by, ascending=False)
-
-
 
     # Filter by search keywords if provided
     if search:
@@ -183,9 +219,7 @@ async def visualization(request: Request, category: str, search: str = Query(Non
         })
 
     # Truncate long titles
-    # df["short_title"] = df["title"].apply(lambda x: x[:20] + "..." if len(x) > 20 else x)
     df["short_title"] = df["title"].apply(lambda x: str(x)[:20] + "..." if isinstance(x, str) and len(x) > 20 else str(x))
-
 
     # # Create chart
     # fig = px.bar(
@@ -201,8 +235,8 @@ async def visualization(request: Request, category: str, search: str = Query(Non
         df,
         x="index",
         # y="short_title",
-        y="reviews",
-        color="reviews",
+        y=f"{filter_by}",
+        color=f"{filter_by}",
         hover_data={"title": True, "rating": True, "short_title": False, "index": False, },
         size_max=50,
         labels={
@@ -223,9 +257,121 @@ async def visualization(request: Request, category: str, search: str = Query(Non
             "request": request,
             "plot": plot_html,
             "items": items,
-            # "filter_by": option,
+            "category": category,
             "filename": filename.rstrip(".xlsx"),
         })
+
+
+
+@app.get('/visualization-test/{category}')
+async def visualization(
+    request: Request, 
+    category: str, 
+    search: str = Query(None), 
+    filter_by: str = Query(None), 
+    date: str = Query(None), 
+    ):
+
+    print(' ********************* DATE ******************** ', date)
+    print(' ********************* category ******************** ', category)
+
+    date_ = None
+    if date == "one" :
+        date_ = time.strftime("%Y-%m-%d")
+
+    if category:
+        base_path = f"amz/amz/products/{category}/"
+        # Get all date folders
+        date_folders = [d for d in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, d))]
+        valid_dates = [d for d in date_folders if d.count("-") == 2]
+
+        latest_date = max(valid_dates, key=lambda x: datetime.strptime(x, "%Y-%m-%d"))
+        print(' ********************* latest_date ******************** ', latest_date)
+    else:
+        print(' ********************* no category ******************** ')
+
+    DATA_DIR = f"amz/amz/products/{category}/{latest_date}"
+    
+    filename = f"{category}.xlsx"
+    file_path = os.path.join(DATA_DIR, filename)
+    print(' ******************** DATA_DIR ****************** ', file_path)
+
+    if not os.path.exists(file_path):
+        return HTMLResponse(content=f"<h1>File not found: {filename}</h1>", status_code=404)
+
+    df = pd.read_excel(file_path)
+
+    df["index"] = range(len(df))
+
+    # Ensure price is numeric
+    df["price"] = df["price"].astype(str).str.replace(r"\D", "", regex=True)  # Remove non-numeric characters
+    df["price"] = pd.to_numeric(df["price"], errors="coerce").fillna(0)
+
+    # Ensure review is numeric
+    df["reviews"] = df["reviews"].astype(str).str.replace(r"\D", "", regex=True)  # Remove non-numeric characters
+    df["reviews"] = pd.to_numeric(df["reviews"], errors="coerce").fillna(0)
+
+    df["rating"] = pd.to_numeric(df["rating"], errors="coerce").fillna(0)
+
+    # Sort by reviews in descending order (most reviewed first)
+    # df = df.dropna(subset=["reviews"]).sort_values(by="reviews", ascending=False)
+    df = df.sort_values(by=filter_by, ascending=False)
+
+    # Filter by search keywords if provided
+    if search:
+        keywords = search.lower().split()
+        df = df[df["title"].str.lower().apply(lambda title: any(word in title for word in keywords))]
+
+    if df.empty:
+        return templates.TemplateResponse("visualization.html", {
+            "request": request,
+            "plot": None,
+            "items": "<h3>No data found.</h3>",
+        })
+
+    # Truncate long titles
+    df["short_title"] = df["title"].apply(lambda x: str(x)[:20] + "..." if isinstance(x, str) and len(x) > 20 else str(x))
+
+    # # Create chart
+    # fig = px.bar(
+    #     df,
+    #     y="short_title", 
+    #     x="price", 
+    #     color="price", 
+    #     hover_data={"short_title": False, "title": True},
+    # )
+
+    # Scatter
+    fig = px.scatter(
+        df,
+        x="index",
+        # y="short_title",
+        y=f"{filter_by}",
+        color=f"{filter_by}",
+        hover_data={"title": True, "rating": True, "short_title": False, "index": False, },
+        size_max=50,
+        labels={
+            "short_title": "Tytuł",
+            "reviews": "Popularność",
+            "rating": "Ocena",
+        },
+        height=600
+    )
+
+
+    plot_html = fig.to_html(full_html=True)
+    # .xlsx table to html table:
+    # table_html = df.to_html(classes="table table-striped", index=False, escape=False)
+    items = df.to_dict(orient="records")
+
+    return templates.TemplateResponse("visualization.html", {
+            "request": request,
+            "plot": plot_html,
+            "items": items,
+            "category": category,
+            "filename": filename.rstrip(".xlsx"),
+        })
+
 
 
 

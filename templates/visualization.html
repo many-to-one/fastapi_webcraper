@@ -10,7 +10,7 @@
         iframe { width: 100%; height: 600px; border: none; } */
     </style>
 </head>
-<body>
+<body data-category="{{ category }}">
 
         <form class="search-form-vis">
 
@@ -18,7 +18,7 @@
 
             <div id="menu" style="display: none; cursor: pointer;">
 
-                <div id="categoryId">
+                <div id="categoryId" value="{{ category }}">
                     <p class="close-menu" onclick="showMenu()">X</p>   
 
                         <p onclick="showCat(3)">Dziecko, zabawki i gry</p>
@@ -34,17 +34,17 @@
                             <p onclick="setSubCat('Maskotki i pluszaki', 3)">Maskotki i pluszaki</p>
                             <p onclick="setSubCat('Pacynki i teatrzyki kukiełkowe', 3)">Pacynki i teatrzyki kukiełkowe</p>
                             <p onclick="setSubCat('Plastyka', 3)">Plastyka</p>
-                            <p onclick="setSubCat('Pojazdy zabawkowe')">Pojazdy zabawkowe</p>
-                            <p onclick="setSubCat('Produkty do zabawy w przebieranki i udawanie')">Produkty do zabawy w przebieranki i udawanie</p>
-                            <p onclick="setSubCat('Puzzle, łamigłówki i akcesoria')">Puzzle, łamigłówki i akcesoria</p>
-                            <p onclick="setSubCat('Sport i turystyka')">Sport i turystyka</p>
+                            <p onclick="setSubCat('Pojazdy zabawkowe', 3)">Pojazdy zabawkowe</p>
+                            <p onclick="setSubCat('Produkty do zabawy w przebieranki i udawanie', 3)">Produkty do zabawy w przebieranki i udawanie</p>
+                            <p onclick="setSubCat('Puzzle, łamigłówki i akcesoria', 3)">Puzzle, łamigłówki i akcesoria</p>
+                            <p onclick="setSubCat('Sport i turystyka', 3)">Sport i turystyka</p>
                             <p onclick="setSubCat('Śmieszne i nowatorskie zabawki')">Śmieszne i nowatorskie zabawki</p>
-                            <p onclick="setSubCat('Zabawki dla małych dzieci i niemowląt')">Zabawki dla małych dzieci i niemowląt</p>
-                            <p onclick="setSubCat('Zabawki do nauki i edukacji')">Zabawki do nauki i edukacji</p>
+                            <p onclick="setSubCat('Zabawki dla małych dzieci i niemowląt', 3)">Zabawki dla małych dzieci i niemowląt</p>
+                            <p onclick="setSubCat('Zabawki do nauki i edukacji', 3)">Zabawki do nauki i edukacji</p>
                             <p onclick="setSubCat('Zabawki elektroniczne', 3)">Zabawki elektroniczne</p>
-                            <p onclick="setSubCat('Zabawki kolekcjonerskie')">Zabawki kolekcjonerskie</p>
-                            <p onclick="setSubCat('Zabawki konstrukcyjne i do budowania')">Zabawki konstrukcyjne i do budowania</p>
-                            <p onclick="setSubCat('Zabawkowe instrumenty muzyczne')">Zabawkowe instrumenty muzyczne</p>
+                            <p onclick="setSubCat('Zabawki kolekcjonerskie', 3)">Zabawki kolekcjonerskie</p>
+                            <p onclick="setSubCat('Zabawki konstrukcyjne i do budowania', 3)">Zabawki konstrukcyjne i do budowania</p>
+                            <p onclick="setSubCat('Zabawkowe instrumenty muzyczne', 3)">Zabawkowe instrumenty muzyczne</p>
                             <p onclick="setSubCat('Zdalnie sterowane zabawki', 3)">Zdalnie sterowane zabawki</p>
                             <h4>Dziecko</h4>
                             <p onclick="setSubCat('Odzież i obuwie')">Odzież i obuwie</p>
@@ -79,7 +79,7 @@
                     <option value="rating">Ocena</option>
                 </select>
 
-                <select name="filter_date" id="date">
+                <select name="date" id="date">
                     <option id="sel_date" value="one" disabled selected>Z jednego dnia</option>
                     <option value="one">Z jednego dnia</option>
                     <option value="three">Z trech dni</option>
@@ -88,7 +88,7 @@
                     <option value="max">Maks</option>
                 </select>
                               
-                <button onclick="showVis()">Go</button>
+                <button onclick="showVisTitle()">Go</button>
             </div>
 
             <div class="info">
@@ -132,7 +132,9 @@
     <script>
 
         function setSubCat(category, number) {
+            const cat = document.getElementById('categoryId').value;
             console.log('selected category:', category);
+            console.log('cat:', cat);
             document.getElementById("selectedCat").value = category;
             var selected_category = document.getElementById('selected_category');
             selected_category.innerHTML = category;
