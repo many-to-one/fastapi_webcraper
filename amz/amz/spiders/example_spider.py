@@ -28,6 +28,20 @@ class ExampleSpider(scrapy.Spider):
         # headers = {"User-Agent": random.choice(self.settings.get("USER_AGENT"))}
         # yield scrapy.Request(url=paginated_url, callback=self.parse, headers=headers)
 
+
+    def parse_first_date_availability(self, response):
+
+        product_data = response.meta.get('product_data', {})
+        first_availability_date = response.css('table.a-normal td::text').re_first(r'\d{4}-\d{2}-\d{2}')
+        if first_availability_date:
+            self.logger.info(f"First availability date: {first_availability_date}")
+        else:
+            self.logger.info("First availability date not found.")
+
+        product_data['first_availability_date'] = first_availability_date
+
+        yield product_data
+
     def parse(self, response):
         products = response.css('div.s-main-slot div.s-result-item')
         new_products_found = False
@@ -84,8 +98,7 @@ class ExampleSpider(scrapy.Spider):
                     'price': product.css('span.a-price-whole::text').get(),
                     'rating': product.css('span.a-icon-alt::text').get(),
                     'reviews': product.css('span.a-size-base::text').get(),  
-                    'url': product_url,
-                    'first_availability_date': response.css('table.a-normal td::text').re_first(r'\d{4}-\d{2}-\d{2}')
+                    'url': f"https://amazon.pl{product_url}",
                 }
 
                 count += 1
@@ -96,9 +109,14 @@ class ExampleSpider(scrapy.Spider):
                     self.save_to_excel()
                     raise scrapy.exceptions.CloseSpider("Skipping sponsored product.")
 
-                # if product_data['price'] is not None:
-                self.data.append(product_data)  # Add product to list
-                yield product_data
+                # self.data.append(product_data)  # Add product to list
+                # yield product_data
+
+                yield scrapy.Request(
+                    url=f"https://amazon.pl{product_url}",
+                    callback=self.parse_first_date_availability,
+                    meta={'product_data': product_data}
+                )
 
         if new_products_found:
             self.current_page += 1

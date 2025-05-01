@@ -374,7 +374,12 @@ async def visualization(
 
 
 
-
+"""
+Create a strategy to call this function after end of scraping
+to get date/category.xlsx file and extract all urls to scrape
+the first_date_avaliability and record this date to the 
+first_date_avaliability field.
+"""
 @app.get("/whole-amz-scraping")
 async def start_scraping():
     process = CrawlerProcess()
@@ -383,100 +388,6 @@ async def start_scraping():
 
     start_urls_batch_1 = [f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861477031&page={i}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank' for i in range(1, 31)]
     start_urls_batch_2 = [f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861473031&page={i}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank' for i in range(1, 31)]
-    
-    # start_urls_batch_1 = [
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861477031&page={1}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861477031&page={2}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861477031&page={3}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861477031&page={4}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861477031&page={5}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861477031&page={6}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861477031&page={7}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861477031&page={8}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861477031&page={9}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861477031&page={10}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861477031&page={11}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861477031&page={12}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861477031&page={13}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861477031&page={14}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861477031&page={15}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861477031&page={16}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861477031&page={17}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861477031&page={18}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861477031&page={19}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861477031&page={20}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    # #     "https://www.amazon.pl/s?i=toys&rh=n%3A20659660031%2Cn%3A20861477031",
-    #     "https://www.amazon.pl/s?i=toys&rh=n%3A20659660031%2Cn%3A20861473031",
-    #     "https://www.amazon.pl/s?i=toys&rh=n%3A20659660031%2Cn%3A20861471031",
-    #     "https://www.amazon.pl/s?i=toys&rh=n%3A20659660031%2Cn%3A20861480031",
-    #     "https://www.amazon.pl/s?i=toys&rh=n%3A20659660031%2Cn%3A20861468031",
-    #     "https://www.amazon.pl/s?i=toys&rh=n%3A20659660031%2Cn%3A20861472031",
-    #     "https://www.amazon.pl/s?i=toys&rh=n%3A20659660031%2Cn%3A20861464031",
-    #     "https://www.amazon.pl/s?i=toys&rh=n%3A20659660031%2Cn%3A20861467031",
-    #     "https://www.amazon.pl/s?i=toys&rh=n%3A20659660031%2Cn%3A20861465031",
-    #     "https://www.amazon.pl/s?i=toys&rh=n%3A20659660031%2Cn%3A20861476031",
-    #     "https://www.amazon.pl/s?i=toys&rh=n%3A20659660031%2Cn%3A20861469031",
-    #     "https://www.amazon.pl/s?i=toys&rh=n%3A20659660031%2Cn%3A20861475031",
-    #     "https://www.amazon.pl/s?i=toys&rh=n%3A20659660031%2Cn%3A20861474031",
-    #     "https://www.amazon.pl/s?i=toys&rh=n%3A20659660031%2Cn%3A20861479031",
-    #     "https://www.amazon.pl/s?i=toys&rh=n%3A20659660031%2Cn%3A20861478031",
-    #     "https://www.amazon.pl/s?i=toys&rh=n%3A20659660031%2Cn%3A20861470031",
-    #     "https://www.amazon.pl/s?i=toys&rh=n%3A20659660031%2Cn%3A20861466031",
-    #     "https://www.amazon.pl/s?i=toys&rh=n%3A20659660031%2Cn%3A20861484031",
-    #     "https://www.amazon.pl/s?i=fashion&rh=n%3A20849017031",
-    #     "https://www.amazon.pl/s?i=baby&rh=n%3A20806748031",
-    #     "https://www.amazon.pl/s?i=baby&rh=n%3A20806764031",
-    #     "https://www.amazon.pl/s?i=baby&rh=n%3A20806749031",
-    #     "https://www.amazon.pl/s?i=baby&rh=n%3A20806743031",
-    #     "https://www.amazon.pl/s?i=baby&rh=n%3A20806747031",
-    #     "https://www.amazon.pl/s?i=baby&rh=n%3A20806745031",
-    #     "https://www.amazon.pl/s?i=baby&rh=n%3A20806740031",
-    # ]
-
-    # start_urls_batch_2 = [
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861473031&page={1}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861473031&page={2}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861473031&page={3}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861473031&page={4}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861473031&page={5}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861473031&page={6}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861473031&page={7}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861473031&page={8}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861473031&page={9}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861473031&page={10}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861473031&page={11}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861473031&page={12}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861473031&page={13}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861473031&page={14}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861473031&page={15}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861473031&page={16}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861473031&page={17}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861473031&page={18}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861473031&page={19}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-    #     f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861473031&page={20}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank',
-
-    #     "https://www.amazon.pl/s?i=home&rh=n%3A20853159031",
-    #     "https://www.amazon.pl/s?i=home&rh=n%3A20853010031",
-    #     "https://www.amazon.pl/s?i=home&rh=n%3A20853014031",
-    #     "https://www.amazon.pl/s?i=home&rh=n%3A20852960031",
-    #     "https://www.amazon.pl/s?i=home&rh=n%3A20852956031",
-    #     "https://www.amazon.pl/s?i=home&rh=n%3A20852961031",
-    #     "https://www.amazon.pl/s?i=home&rh=n%3A20852957031",
-    #     "https://www.amazon.pl/s?i=home&rh=n%3A20852964031",
-    #     "https://www.amazon.pl/s?i=home&rh=n%3A20852963031",
-    #     "https://www.amazon.pl/s?i=home&rh=n%3A20852962031",
-    #     "https://www.amazon.pl/s?i=home-improvement&rh=n%3A20784174031",
-    #     "https://www.amazon.pl/s?i=home-improvement&rh=n%3A20784170031",
-    #     "https://www.amazon.pl/s?i=home-improvement&rh=n%3A20784171031",
-    #     "https://www.amazon.pl/s?i=home-improvement&rh=n%3A20784162031",
-    #     "https://www.amazon.pl/s?i=home-improvement&rh=n%3A20784164031",
-    #     "https://www.amazon.pl/s?i=home-improvement&rh=n%3A20784169031",
-    #     "https://www.amazon.pl/s?i=garden&rh=n%3A20855078031",
-    #     "https://www.amazon.pl/s?i=garden&rh=n%3A20855086031",
-    #     "https://www.amazon.pl/s?i=garden&rh=n%3A20855088031",
-    #     "https://www.amazon.pl/s?i=garden&rh=n%3A20855076031",
-
-    # ]
 
 
     # Launch 2 different crawls with different start URLs
