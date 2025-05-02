@@ -381,25 +381,52 @@ the first_date_avaliability and record this date to the
 first_date_avaliability field.
 """
 @app.get("/whole-amz-scraping")
-async def start_scraping():
+async def start_scraping(
+    request: Request, 
+    category: str,
+):
+
+    if category:
+        base_path = f"amz/amz/products/{category}/"
+        # Get all date folders
+        date_folders = [d for d in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, d))]
+        valid_dates = [d for d in date_folders if d.count("-") == 2]
+
+        latest_date = max(valid_dates, key=lambda x: datetime.strptime(x, "%Y-%m-%d"))
+        print(' ********************* latest_date ******************** ', latest_date)
+    else:
+        print(' ********************* no category ******************** ')
+
+    DATA_DIR = f"amz/amz/products/{category}/{latest_date}"
+    
+    filename = f"{category}.xlsx"
+    file_path = os.path.join(DATA_DIR, filename)
+    print(' ******************** DATA_DIR ****************** ', file_path)
+
+    df = pd.read_excel(file_path)
+
     process = CrawlerProcess()
 
-    batch_url = "https://www.amazon.pl/s?i="
+    df = pd.read_excel(file_path)
+    urls = df["url"].dropna().tolist()
 
-    start_urls_batch_1 = [f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861477031&page={i}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank' for i in range(1, 31)]
-    start_urls_batch_2 = [f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861473031&page={i}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank' for i in range(1, 31)]
+    if not urls:
+        return {"error": "No URLs found in Excel."}
+
+    batches = [urls]  # one batch with all URLs
+
+    for batch in batches:
+        process.crawl(WholeSpider, start_urls=batch, file_path=file_path)
+
+    # batch_url = "https://www.amazon.pl/s?i="
+
+    # start_urls_batch_1 = [f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861477031&page={i}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank' for i in range(1, 31)]
+    # start_urls_batch_2 = [f'{batch_url}toys&rh=n%3A20659660031%2Cn%3A20861473031&page={i}&ref=sr_nr_p_n_condition-type_1&s=popularity-rank' for i in range(1, 31)]
 
 
-    # Launch 2 different crawls with different start URLs
-    process.crawl(WholeSpider, start_urls=start_urls_batch_1)
-    process.crawl(WholeSpider, start_urls=start_urls_batch_2)
-
-    # # You can dynamically generate batches like:
-    # urls = get_urls_from_excel("offers.xlsx")
-    # batches = [urls[i:i + 10] for i in range(0, len(urls), 10)]
-
-    # for batch in batches:
-    #     process.crawl(MySpider, start_urls=batch)
+    # # Launch 2 different crawls with different start URLs
+    # process.crawl(WholeSpider, start_urls=start_urls_batch_1)
+    # process.crawl(WholeSpider, start_urls=start_urls_batch_2)
 
     process.start()
 

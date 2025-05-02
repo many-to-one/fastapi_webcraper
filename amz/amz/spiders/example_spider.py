@@ -1,5 +1,6 @@
 import os, requests
 import scrapy, time, openpyxl, random
+from scrapy import signals
 import pandas as pd
 from openpyxl import load_workbook
 
@@ -11,11 +12,13 @@ class ExampleSpider(scrapy.Spider):
         super().__init__(*args, **kwargs)
         self.base_url = url if url else "https://default-url.com"
         self.category_name = category_name
+        self.file_path = ''
         self.current_page = 1
         self.filter_by = filter_by
         self.scraped_urls = set()
         self.asins = set()
         self.data = []  # List to store all scraped offers
+        self.results = []
 
     def start_requests(self):
         print(' ############################### self.base_url ############################### ', self.base_url)
@@ -29,18 +32,6 @@ class ExampleSpider(scrapy.Spider):
         # yield scrapy.Request(url=paginated_url, callback=self.parse, headers=headers)
 
 
-    def parse_first_date_availability(self, response):
-
-        product_data = response.meta.get('product_data', {})
-        first_availability_date = response.css('table.a-normal td::text').re_first(r'\d{4}-\d{2}-\d{2}')
-        if first_availability_date:
-            self.logger.info(f"First availability date: {first_availability_date}")
-        else:
-            self.logger.info("First availability date not found.")
-
-        product_data['first_availability_date'] = first_availability_date
-
-        yield product_data
 
     def parse(self, response):
         products = response.css('div.s-main-slot div.s-result-item')
@@ -109,14 +100,9 @@ class ExampleSpider(scrapy.Spider):
                     self.save_to_excel()
                     raise scrapy.exceptions.CloseSpider("Skipping sponsored product.")
 
-                # self.data.append(product_data)  # Add product to list
-                # yield product_data
+                self.data.append(product_data)  # Add product to list
+                yield product_data
 
-                yield scrapy.Request(
-                    url=f"https://amazon.pl{product_url}",
-                    callback=self.parse_first_date_availability,
-                    meta={'product_data': product_data}
-                )
 
         if new_products_found:
             self.current_page += 1
@@ -125,14 +111,13 @@ class ExampleSpider(scrapy.Spider):
             yield scrapy.Request(url=next_page_url, callback=self.parse)
 
             if self.current_page % 10 == 0:
-            # # if self.current_page == 2:
-                self.save_to_excel()
-                long_random_delay = random.uniform(1, 2) # random.uniform(60, 120)
+    
+                long_random_delay = random.uniform(2, 3) # random.uniform(60, 120)
                 time.sleep(long_random_delay)  # Longer delay every 20 pages
                 self.logger.info(f" ************* LONG DELAY {long_random_delay} seconds at {self.current_page} page ************* ")
 
                 yield scrapy.Request(url=next_page_url, callback=self.parse)
-            
+                
             else:
                 time.sleep(random_delay)  # Sleep for a random time to avoid being blocked
                 self.logger.info(f" ************* Scraping page {self.current_page}... ****** DELAY {random_delay} seconds ************* ")
@@ -152,6 +137,7 @@ class ExampleSpider(scrapy.Spider):
         filename = f"{self.category_name}.xlsx"
 
         file_path = os.path.join(DATA_DIR, filename)
+        self.file_path = file_path
 
         # Convert data to a Pandas DataFrame
         df = pd.DataFrame(self.data)
@@ -185,170 +171,70 @@ class ExampleSpider(scrapy.Spider):
             # Save changes
             workbook.save(file_path)
 
-            self.logger.info(f"Data saved to '{file_path}', only unique ASINs recorded.")
+            self.logger.info(f" ############################### Data saved to '{file_path}', only unique ASINs recorded. ###############################")
             self.data = []  # Clear the data list after saving
+
+            return True
+
+            
 
         except FileNotFoundError:
             # If file doesn't exist, create a new one with unique ASINs
             sorted_df.to_excel(file_path, index=False, engine="openpyxl")
 
 
+        
 
-    # def save_to_excel(self):
-    #         filename=f"{self.category_name}.xlsx"
-    #         # Convert data to a Pandas DataFrame
-    #         df = pd.DataFrame(self.data)
 
-    #         df["price"] = pd.to_numeric(df["price"].str.replace("\xa0", "", regex=False), errors="coerce")
-    #         df["rating"] = pd.to_numeric(df["rating"].str.extract(r'(\d+)')[0], errors="coerce")
-
-    #         sorted_df = df.sort_values(by="price", ascending=False)
+    # def start_urls_requests(self, file_path):
+            
+    #         print(' ++++++++++++++++++++++++++++++++++++++ start_urls_requests ++++++++++++++++++++++++++++++++++++++ ', file_path)
 
     #         try:
-    #             # Load the existing workbook
-    #             workbook = openpyxl.load_workbook(filename)
+    #             df = pd.read_excel(self.file_path)
+    #         except Exception as e:
+    #             self.logger.error(f"Failed to read Excel file: {e}")
+    #             return
 
-    #             # Select the active sheet or specify a sheet name
-    #             sheet = workbook.active  # or workbook['SheetName']
+    #         for url in df['url'].dropna():
+    #             yield scrapy.Request(
+    #                 url=url,
+    #                 callback=self.parse_first_date,
+    #                 meta={'product_url': url}
+    #             )
 
-    #             # Append rows of DataFrame to the sheet
-    #             for _, row in sorted_df.iterrows():
-    #                 sheet.append(row.tolist())  # Convert the row to a list and append it
+    # def parse_first_date(self, response):
+    #     product_url = response.meta.get('product_url')
+    #     first_availability_date = '---'
+    #     first_availability_date = response.xpath(
+    #         '//th[contains(text(), "Data pierwszej dostępności")]/following-sibling::td/text()'
+    #     ).get()
+    #     print(' ++++++++++++++++++++++++++++++++++++++ first_availability_date ++++++++++++++++++++++++++++++++++++++ ', first_availability_date)
 
-    #             # Save the workbook
-    #             workbook.save(filename)
-
-
-    #             self.logger.info(" @@@@@@@@@@@@@@@@@@@@@ Data saved to 'scraped_offers.xlsx'@@@@@@@@@@@@@@@@@@@@@ ")
-    #             self.data = []  # Clear the data list after saving to Excel
-
-    #         except FileNotFoundError:
-    #             # If file doesn't exist, create a new one
-    #             sorted_df.to_excel(filename, index=False, engine="openpyxl")
-
-
-
-# ********************************************************************************
-
-
-
-# class ExampleSpider(scrapy.Spider):
-#     name = "amazon"
-
-#     def __init__(self, url=None, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.base_url = url if url else "https://default-url.com"
-#         self.current_page = 1  # Start from page 1
-#         self.scraped_urls = set()  # Track scraped product URLs
-#         self.data = []  # Initialize an empty list to store product data
-
-#     def start_requests(self):
-#         paginated_url = f"{self.base_url}&page={self.current_page}"
-#         yield scrapy.Request(url=paginated_url, callback=self.parse)
-
-#     def parse(self, response):
-#         products = response.css('div.s-main-slot div.s-result-item')  # Select all products
-#         new_products_found = False  # Flag to check if new products are found
-
-#         for product in products:
-#             product_url = product.css('a.a-link-normal::attr(href)').get()
-
-#             if product_url and product_url not in self.scraped_urls:
-#                 new_products_found = True
-#                 self.scraped_urls.add(product_url)  # Add to the set of scraped URLs
-
-#                 # yield {
-#                 #     'title': product.css('span::text').get(),
-#                 #     'image_url': product.css('img.s-image::attr(src)').get(),
-#                 #     'price': product.css('span.a-price-whole::text').get(),
-#                 #     'rating': product.css('span.a-icon-alt::text').get(),
-#                 #     'reviews': product.css('span.a-size-base.s-underline-text::text').get(),
-#                 #     'url': product_url,
-#                 # }
-
-#                 products_data= {
-#                         'title': product.css('span::text').get(),
-#                         'image_url': product.css('img.s-image::attr(src)').get(),  
-#                         'price': product.css('span.a-price-whole::text').get(),
-#                         'rating': product.css('span.a-icon-alt::text').get(),
-#                         'reviews': product.css('span.a-size-base.s-underline-text::text').get(),
-#                         'url': product.css('a.a-link-normal::attr(href)').get(),
-#                     }
-                
-#                 self.data.append(products_data)  # Append the product data to the list
-
-#                 yield products_data
-
-#         if new_products_found:  # If new products were found, continue to the next page
-#             self.current_page += 1
-#             next_page_url = f"{self.base_url}&page={self.current_page}"
-#             random_delay = random.uniform(1, 10)  # Random delay between 1 and 3 seconds
-#             time.sleep(random_delay)  # Sleep for a random time to avoid being blocked
-#             self.logger.info(f"Scraping page {self.current_page}...")
-
-#             yield scrapy.Request(url=next_page_url, callback=self.parse)
-#         else:  # No new products found, stop scraping
-#             self.logger.info("No new products found, stopping spider.")
-#             self.save_to_excel()  # Save data to Excel when done
-#             self.logger.info("Data saved to products.xlsx")
-
-
-#     def save_to_excel(self):
-#         df = pd.DataFrame(self.data)
-#         df.to_excel("products.xlsx", index=False, engine="openpyxl")
-#         self.logger.info("Data saved to products.xlsx")
-
-
-# *******************************************************************************************
-
-
-# class ExampleSpider(scrapy.Spider):
-
-#     name = "amazon"
-#     allowed_domains = ["amazon.pl"]
-#     # start_urls = ["https://www.amazon.com/s?k=laptops&page=22"] # Wyszukiwarka
-#     # start_urls = ["https://www.amazon.com/s?k=zabawki&page=8"] # i td
-#     # start_urls = ["https://www.amazon.com/s?k=tablets&rh=n%3A1232597011%2Cp_n_size_browse-bin%3A7817235011&crid=1Y6QHLGWI6DP1&nav_sdd=aps&rnid=1254615011&sprefix=tablets&ref=nb_sb_ss_w_sbl-tr-t1_k0_1_7_0"]
-
-#     def __init__(self, url=None, *args, **kwargs):
-#        super().__init__(*args, **kwargs)
-#        url = "https://www.amazon.pl/s?k=laptops"
-#        self.base_url = url if url else ["https://default-url.com"]  
-#        self.num_pages = 2
-
-#     def start_requests(self):
-#         for page in range(1, self.num_pages + 1):
-#             url = f"{self.base_url}&page={page}"
-#             yield scrapy.Request(url=url, callback=self.parse)
-
-#     def parse(self, response):
-
-#         if response.status == 403:
-#             self.log("Access forbidden - 403 error.")
-#             return
         
-#         # products = []
+    #     if first_availability_date:
+    #         self.logger.info(f"First availability date: {first_availability_date}")
+    #     else:
+    #         self.logger.info("First availability date not found.")
 
-#         for product in response.css('div.s-main-slot div.s-result-item'):
-#         #     products.append(
-#         #         {
-#         #             'title': product.css('span::text').get(),
-#         #             'image_url': product.css('img.s-image::attr(src)').get(),  
-#         #             'price': product.css('span.a-price-whole::text').get(),
-#         #             'rating': product.css('span.a-icon-alt::text').get(),
-#         #             'reviews': product.css('span.a-size-base.s-underline-text::text').get(),
-#         #             'url': product.css('a.a-link-normal::attr(href)').get(),
-#         #         }
-#         #     )
+    #     self.results.append({
+    #         'url': product_url,
+    #         'first_availability_date': first_availability_date
+    #     })
 
-#         #     df = pd.DataFrame(products)
-#         #     df.to_excel("products.xlsx", index=False, engine="openpyxl")
 
-#             yield {
-#                 'title': product.css('span::text').get(),
-#                 'image_url': product.css('img.s-image::attr(src)').get(),  # Extract image URL
-#                 'price': product.css('span.a-price-whole::text').get(),
-#                 'rating': product.css('span.a-icon-alt::text').get(),
-#                 'reviews': product.css('span.a-size-base.s-underline-text::text').get(),
-#                 'url': product.css('a.a-link-normal::attr(href)').get(),
-#             }
+    # @classmethod
+    # def from_crawler(cls, crawler, *args, **kwargs):
+    #     spider = super(ExampleSpider, cls).from_crawler(crawler, *args, **kwargs)
+    #     crawler.signals.connect(spider.spider_closed, signal=signals.spider_closed)
+    #     return spider
+
+    # def spider_closed(self, spider):
+    #     try:
+    #         df = pd.read_excel(self.file_path)
+    #         result_df = pd.DataFrame(self.results)
+    #         df = df.merge(result_df, on='url', how='left')
+    #         df.to_excel(self.file_path, index=False)
+    #         self.logger.info(f"Saved updated file to {self.file_path}")
+    #     except Exception as e:
+    #         self.logger.error(f"Error saving Excel file: {e}")
