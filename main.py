@@ -380,7 +380,7 @@ to get date/category.xlsx file and extract all urls to scrape
 the first_date_avaliability and record this date to the 
 first_date_avaliability field.
 """
-@app.get("/whole-amz-scraping")
+@app.get("/whole-amz-scraping/{category}")
 async def start_scraping(
     request: Request, 
     category: str,

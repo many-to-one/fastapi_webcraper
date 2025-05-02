@@ -75,6 +75,9 @@ class WholeSpider(scrapy.Spider):
         # Update the corresponding row in the DataFrame
         self.df.loc[self.df["url"] == response.url, "first_availability_date"] = first_availability_date
 
+        random_delay = random.uniform(1, 2)
+        time.sleep(random_delay)
+
         # Stop condition
         if self.page_counter >= self.max_pages or self.page_counter >= len(self.start_urls):
             self.save_to_excel()

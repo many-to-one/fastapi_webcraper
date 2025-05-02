@@ -112,17 +112,24 @@ class ExampleSpider(scrapy.Spider):
 
             if self.current_page % 10 == 0:
     
-                long_random_delay = random.uniform(2, 3) # random.uniform(60, 120)
+                long_random_delay = random.uniform(1, 2) # random.uniform(60, 120)
                 time.sleep(long_random_delay)  # Longer delay every 20 pages
+                self.save_to_excel()
                 self.logger.info(f" ************* LONG DELAY {long_random_delay} seconds at {self.current_page} page ************* ")
 
                 yield scrapy.Request(url=next_page_url, callback=self.parse)
+
+            # if self.current_page == 20:
+            #     self.logger.info("20 finish. Saving to Excel.")
+            #     self.save_to_excel()  # Call the save function when scraping stops
+            #     return
                 
             else:
                 time.sleep(random_delay)  # Sleep for a random time to avoid being blocked
                 self.logger.info(f" ************* Scraping page {self.current_page}... ****** DELAY {random_delay} seconds ************* ")
 
                 yield scrapy.Request(url=next_page_url, callback=self.parse)
+        
         else:
             self.logger.info("No new products found. Saving to Excel.")
             self.save_to_excel()  # Call the save function when scraping stops
