@@ -98,6 +98,7 @@ ROTATING_PROXY_LIST = load_proxies()
 #             '87.163.177.84',
 #             '46.137.108.160',
 #         ],
+
 DOWNLOADER_MIDDLEWARES = {
     'scrapy.downloadermiddlewares.retry.RetryMiddleware': 90,
     'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 110,
@@ -123,6 +124,9 @@ USER_AGENT = [
     "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36 Edge/87.0.664.66"
 ]
 
+RANDOM_UA_PER_PROXY = True # different User-Agent for each proxy
+RANDOMIZE_DOWNLOAD_DELAY = True
+
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False #True
 
@@ -133,7 +137,7 @@ CONCURRENT_SPIDERS = 2
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 0
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16

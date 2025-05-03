@@ -11,4 +11,3 @@ class AmzItem(scrapy.Item):
     # name = scrapy.Field()
     pass
 
-

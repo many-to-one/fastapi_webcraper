@@ -71,21 +71,40 @@ class WholeSpider(scrapy.Spider):
             '//th[contains(text(), "Data pierwszej dostępności")]/following-sibling::td/text()'
         ).get()
         print(' ++++++++++++++++++++++++++++++++++++++ first_availability_date ++++++++++++++++++++++++++++++++++++++ ', first_availability_date)
+        print(' ++++++++++++++++++++++++++++++++++++++ response.url ++++++++++++++++++++++++++++++++++++++ ', response.url)
+
+        from urllib.parse import urlparse
+
+        # Function to normalize URL (remove query parameters)
+        def clean_url(url):
+            return urlparse(url).scheme + "://" + urlparse(url).netloc + urlparse(url).path
+
+        # Apply cleaning before matching
+        self.df["clean_url"] = self.df["url"].apply(clean_url)
+        print(' ++++++++++++++++++++++++++++++++++++++ self.df["clean_url"] ++++++++++++++++++++++++++++++++++++++ ', self.df["clean_url"])
+
+        # Now compare with response.url
+        self.df.loc[self.df["clean_url"] == response.url, "first_availability_date"] = first_availability_date
 
         # Update the corresponding row in the DataFrame
-        self.df.loc[self.df["url"] == response.url, "first_availability_date"] = first_availability_date
+        # self.df.loc[self.df["url"] == response.url, "first_availability_date"] = first_availability_date
 
-        random_delay = random.uniform(1, 2)
+        random_delay = random.uniform(3, 5)
         time.sleep(random_delay)
 
-        # Stop condition
-        if self.page_counter >= self.max_pages or self.page_counter >= len(self.start_urls):
-            self.save_to_excel()
+        self.save_to_excel()
+
+        # # Stop condition
+        # if self.page_counter >= self.max_pages or self.page_counter >= len(self.start_urls):
+        # # if self.page_counter % 10 == 0:
+        #     print(' ++++++++++++++++++++++++++++++++++++++ self.page_counter % 10 == 0 ++++++++++++++++++++++++++++++++++++++ ',)
+        #     self.save_to_excel()
 
 
 
 
     def save_to_excel(self):
+        print(' ++++++++++++++++++++++++++++++++++++++ save_to_excel calling ++++++++++++++++++++++++++++++++++++++ ',)
         try:
             self.df.to_excel(self.file_path, index=False)
             self.logger.info(f" ++++++++++++++++++++++++++++++++++++++ Updated Excel file saved to: {self.file_path} ++++++++++++++++++++++++++++++++++++++ ")

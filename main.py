@@ -431,3 +431,44 @@ async def start_scraping(
     process.start()
 
     return {"status": "Scraping started"}
+
+
+@app.get("/date-amz-scraping/{category}")
+async def scrape_urls(
+    background_tasks: BackgroundTasks, 
+    category: str,
+    ):
+
+    if category:
+        base_path = f"amz/amz/products/{category}/"
+        # Get all date folders
+        date_folders = [d for d in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, d))]
+        valid_dates = [d for d in date_folders if d.count("-") == 2]
+
+        latest_date = max(valid_dates, key=lambda x: datetime.strptime(x, "%Y-%m-%d"))
+        print(' ********************* latest_date ******************** ', latest_date)
+    else:
+        print(' ********************* no category ******************** ')
+
+    DATA_DIR = f"amz/amz/products/{category}/{latest_date}"
+    
+    filename = f"{category}.xlsx"
+    file_path = os.path.join(DATA_DIR, filename)
+    print(' ******************** DATA_DIR ****************** ', file_path)
+
+    spider_name = "urls"
+    SCRAPY_PROJECT_PATH = "./amz"
+    
+    DATA_DIR_2 = f"amz/products/{category}/{latest_date}"
+    file_path_2 = os.path.join(DATA_DIR_2, filename)
+
+    # Pass the URL as an argument to the spider
+    command = [
+        "scrapy", "crawl", 
+        spider_name,
+        "-a", f"category={category}",
+        "-a", f"file_path={file_path_2}",
+        ]
+
+    background_tasks.add_task(subprocess.Popen, command, cwd=SCRAPY_PROJECT_PATH) 
+    return {"message": f"Started spider {spider_name}"}

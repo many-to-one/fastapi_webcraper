@@ -23,9 +23,11 @@ class ExampleSpider(scrapy.Spider):
     def start_requests(self):
         print(' ############################### self.base_url ############################### ', self.base_url)
         paginated_url = f"{self.base_url}&page={self.current_page}&ref=sr_nr_p_n_condition-type_1&s={self.filter_by}" # s=price-desc-rank (from highest price) s=popularity-rank
+        # headers = {"User-Agent": random.choice(self.settings.get("USER_AGENT"))}
         yield scrapy.Request(
             url=paginated_url,
-            callback=self.parse
+            callback=self.parse,
+            # headers=headers
         )
         # or manualy random User-Agent logic:
         # headers = {"User-Agent": random.choice(self.settings.get("USER_AGENT"))}
@@ -190,58 +192,76 @@ class ExampleSpider(scrapy.Spider):
             sorted_df.to_excel(file_path, index=False, engine="openpyxl")
 
 
-        
+class UrlsSpider(scrapy.Spider):
+    name = "urls"
 
+    def __init__(self, category=None, file_path=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # self.urls = urls.split(',')
+        self.category = category
+        self.file_path = file_path
+        self.df = pd.read_excel(file_path)
+        self.current_page = 0
+        self.results = []
+        self.polish_months = {
+            "stycznia": "01", "lutego": "02", "marca": "03", "kwietnia": "04",
+            "maja": "05", "czerwca": "06", "lipca": "07", "sierpnia": "08",
+            "września": "09", "października": "10", "listopada": "11", "grudnia": "12"
+        }
+    
 
-    # def start_urls_requests(self, file_path):
+    def start_requests(self):
+        for url in self.df["url"].dropna():
+            # Validate URL format before making a request
+            if not isinstance(url, str) or not url.startswith(("http://", "https://")):
+                self.logger.warning(f" ------------------------- Skipping invalid URL ------------------------- : {url}")
+                continue  # Skip malformed URLs
             
-    #         print(' ++++++++++++++++++++++++++++++++++++++ start_urls_requests ++++++++++++++++++++++++++++++++++++++ ', file_path)
+            # time.sleep(random.uniform(3, 5))  # Random delay between requests
+            headers = {"User-Agent": random.choice(self.settings.get("USER_AGENT", []))}
 
-    #         try:
-    #             df = pd.read_excel(self.file_path)
-    #         except Exception as e:
-    #             self.logger.error(f"Failed to read Excel file: {e}")
-    #             return
+            yield scrapy.Request(url=url, callback=self.parse, headers=headers)
 
-    #         for url in df['url'].dropna():
-    #             yield scrapy.Request(
-    #                 url=url,
-    #                 callback=self.parse_first_date,
-    #                 meta={'product_url': url}
-    #             )
+    def parse(self, response):
 
-    # def parse_first_date(self, response):
-    #     product_url = response.meta.get('product_url')
-    #     first_availability_date = '---'
-    #     first_availability_date = response.xpath(
-    #         '//th[contains(text(), "Data pierwszej dostępności")]/following-sibling::td/text()'
-    #     ).get()
-    #     print(' ++++++++++++++++++++++++++++++++++++++ first_availability_date ++++++++++++++++++++++++++++++++++++++ ', first_availability_date)
+        import re, urllib.parse, datetime
 
+        asin = None
+        def extract_asin(url):
+            match = re.search(r'/dp/([A-Z0-9]+)|/gp/product/([A-Z0-9]+)', url)
+            if match:
+                return match.group(1) or match.group(2)  # Return the ASIN
+            return ''
         
-    #     if first_availability_date:
-    #         self.logger.info(f"First availability date: {first_availability_date}")
-    #     else:
-    #         self.logger.info("First availability date not found.")
+        # first_availability_date = response.xpath(
+        #     '//th[contains(text(), "Data pierwszej dostępności")]/following-sibling::td/text()'
+        # ).get()
+        # first_availability_date = response.css("#productDetails_detailBullets_sections1 td.a-size-base.prodDetAttrValue::text").get()
+        first_availability_date = response.css("#productDetails_detailBullets_sections1 tr:nth-child(3) td::text").get()
+        print(' ++++++++++++++++++++++++++++++++++++++ first_availability_date ++++++++++++++++++++++++++++++++++++++ ', first_availability_date)
+        # date = "---"
+        # if first_availability_date is not None:
+        #     day, month_name, year = first_availability_date.split()
+        #     month = self.polish_months.get(month_name)
+        #     formated_date = f"{year}-{month}-{day.zfill(2)}"
+        #     date = formated_date.datetime.strptime(formated_date, "%y-%m-%d")
+        print(' ++++++++++++++++++++++++++++++++++++++ response.url ++++++++++++++++++++++++++++++++++++++ ', response.url)
+        asin = extract_asin(response.url)
 
-    #     self.results.append({
-    #         'url': product_url,
-    #         'first_availability_date': first_availability_date
-    #     })
+        self.df.loc[self.df["asin"] == asin, "first_availability_date"] = first_availability_date
+
+        self.current_page += 1
+
+        # if self.current_page % 50 == 0:
+        self.save_date_to_excel()
 
 
-    # @classmethod
-    # def from_crawler(cls, crawler, *args, **kwargs):
-    #     spider = super(ExampleSpider, cls).from_crawler(crawler, *args, **kwargs)
-    #     crawler.signals.connect(spider.spider_closed, signal=signals.spider_closed)
-    #     return spider
+    def save_date_to_excel(self):
+        print(' ++++++++++++++++++++++++++++++++++++++ save_date_to_excel calling ++++++++++++++++++++++++++++++++++++++ ',)
+        try:
+            self.df.to_excel(self.file_path, index=False)
+            self.logger.info(f" ++++++++++++++++++++++++++++++++++++++ Updated Excel file saved to: {self.file_path} ++++++++++++++++++++++++++++++++++++++ ")
+            self.current_page == 0
+        except Exception as e:
+            self.logger.error(f" ++++++++++++++++++++++++++++++++++++++ Failed to save Excel file: {e} ++++++++++++++++++++++++++++++++++++++ ")
 
-    # def spider_closed(self, spider):
-    #     try:
-    #         df = pd.read_excel(self.file_path)
-    #         result_df = pd.DataFrame(self.results)
-    #         df = df.merge(result_df, on='url', how='left')
-    #         df.to_excel(self.file_path, index=False)
-    #         self.logger.info(f"Saved updated file to {self.file_path}")
-    #     except Exception as e:
-    #         self.logger.error(f"Error saving Excel file: {e}")
