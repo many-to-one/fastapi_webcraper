@@ -3,6 +3,7 @@ import scrapy, time, openpyxl, random
 from scrapy import signals
 import pandas as pd
 from openpyxl import load_workbook
+from ..settings import USER_AGENT
 
 
 class ExampleSpider(scrapy.Spider):
@@ -23,11 +24,11 @@ class ExampleSpider(scrapy.Spider):
     def start_requests(self):
         print(' ############################### self.base_url ############################### ', self.base_url)
         paginated_url = f"{self.base_url}&page={self.current_page}&ref=sr_nr_p_n_condition-type_1&s={self.filter_by}" # s=price-desc-rank (from highest price) s=popularity-rank
-        # headers = {"User-Agent": random.choice(self.settings.get("USER_AGENT"))}
+        headers = {"User-Agent": random.choice(USER_AGENT)}
         yield scrapy.Request(
             url=paginated_url,
             callback=self.parse,
-            # headers=headers
+            headers=headers
         )
         # or manualy random User-Agent logic:
         # headers = {"User-Agent": random.choice(self.settings.get("USER_AGENT"))}
@@ -132,9 +133,14 @@ class ExampleSpider(scrapy.Spider):
 
                 yield scrapy.Request(url=next_page_url, callback=self.parse)
         
-        else:
-            self.logger.info("No new products found. Saving to Excel.")
+        # else:
+        #     self.logger.info("No new products found. Saving to Excel.")
+        #     self.save_to_excel()  # Call the save function when scraping stops
+
+        if self.current_page == 400:
+            self.logger.info("Scrape limit 400. Saving to Excel.")
             self.save_to_excel()  # Call the save function when scraping stops
+
 
 
 
@@ -208,6 +214,57 @@ class UrlsSpider(scrapy.Spider):
             "maja": "05", "czerwca": "06", "lipca": "07", "sierpnia": "08",
             "września": "09", "października": "10", "listopada": "11", "grudnia": "12"
         }
+
+
+
+
+    def extract_first_availability_date(self, response):
+        # Try from bullet-style product details (most common)
+        value = response.xpath(
+            '//th[contains(text(), "Data pierwszej dostępności")]/following-sibling::td/text()'
+        ).get()
+        
+        if value:
+            return value.strip()
+
+        # Fallback 1: Try from div-based detail sections
+        value = response.xpath(
+            '//span[contains(text(), "Data pierwszej dostępności")]/following-sibling::span/text()'
+        ).get()
+        
+        if value:
+            return value.strip()
+        
+        # Fallback 2: Try any row that has the label in a div table
+        value = response.xpath(
+            '//td[contains(text(), "Data pierwszej dostępności")]/following-sibling::td/text()'
+        ).get()
+
+        if value:
+            return value.strip()
+
+        # Fallback 3: Check bullet section with different nesting
+        # for row in response.css("#detailBullets_feature_div li"):
+        #     label = row.css("span.a-text-bold::text").get()
+        #     if label and "Data pierwszej dostępności" in label:
+        #         date = row.css("span::text")[-1].get()
+        #         return date.strip()
+        import re
+        def clean_text(text):
+            if not text:
+                return ""
+            return re.sub(r"[\u200e\u200f\u202a-\u202e]", "", text).strip()
+        for row in response.css("#detailBullets_feature_div li"):
+
+            label = row.css("span.a-text-bold::text").get()
+            if label and "Data pierwszej dostępności" in clean_text(label):
+                # Get all span texts, the second one is usually the value
+                spans = row.css("span::text").getall()
+                if len(spans) > 1:
+                    return clean_text(spans[-1])
+
+        return None
+
     
 
     def start_requests(self):
@@ -218,7 +275,8 @@ class UrlsSpider(scrapy.Spider):
                 continue  # Skip malformed URLs
             
             # time.sleep(random.uniform(3, 5))  # Random delay between requests
-            headers = {"User-Agent": random.choice(self.settings.get("USER_AGENT", []))}
+            # headers = {"User-Agent": random.choice(self.settings.get("USER_AGENT", []))}
+            headers = {"User-Agent": random.choice(USER_AGENT)}
 
             yield scrapy.Request(url=url, callback=self.parse, headers=headers)
 
@@ -237,7 +295,7 @@ class UrlsSpider(scrapy.Spider):
         #     '//th[contains(text(), "Data pierwszej dostępności")]/following-sibling::td/text()'
         # ).get()
         # first_availability_date = response.css("#productDetails_detailBullets_sections1 td.a-size-base.prodDetAttrValue::text").get()
-        first_availability_date = response.css("#productDetails_detailBullets_sections1 tr:nth-child(3) td::text").get()
+        first_availability_date = self.extract_first_availability_date(response) #response.css("#productDetails_detailBullets_sections1 tr:nth-child(3) td::text").get()
         print(' ++++++++++++++++++++++++++++++++++++++ first_availability_date ++++++++++++++++++++++++++++++++++++++ ', first_availability_date)
         # date = "---"
         # if first_availability_date is not None:

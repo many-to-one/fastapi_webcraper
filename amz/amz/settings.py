@@ -105,7 +105,7 @@ DOWNLOADER_MIDDLEWARES = {
 #     'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
     # 'amz.middlewares.CustomRotatingProxyMiddleware': 610,
     'rotating_proxies.middlewares.BanDetectionMiddleware': 620,
-    'scrapy_user_agents.middlewares.RandomUserAgentMiddleware': 400,
+    # 'scrapy_user_agents.middlewares.RandomUserAgentMiddleware': 400,
     'amz.middlewares.DynamicAutoThrottleMiddleware': 700, 
 }
 
